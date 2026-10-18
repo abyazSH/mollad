@@ -1,0 +1,9 @@
+node_modules
+.next
+package-lock.json
+next-env.d.ts
+public/brand
+prisma/migrations
+playwright-report
+test-results
+.cache

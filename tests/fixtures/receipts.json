@@ -1,0 +1,86 @@
+[
+  [
+    "supermarket",
+    "SUPERINDO\n08/10/2026\nBeras 1 x 65.000\nSUBTOTAL 125.000\nTOTAL Rp 125.000\nTUNAI 150.000\nKEMBALI 25.000",
+    125000,
+    "2026-10-08",
+    "Belanja"
+  ],
+  [
+    "spbu",
+    "PERTAMINA\n08-10-26\nPERTALITE\nJUMLAH 100.000\nTUNAI 100.000",
+    100000,
+    "2026-10-08",
+    "Transportasi"
+  ],
+  [
+    "restoran",
+    "RESTORAN SENJA\n12 Okt 2026\nNasi 2 x 25.000\nSUBTOTAL 50.000\nPPN 11% 5.500\nGRAND TOTAL 55.500",
+    55500,
+    "2026-10-12",
+    "Makanan"
+  ],
+  [
+    "minimarket",
+    "INDOMARET\n01/10/2026\nAir 1 x 1.250,00\nTOTAL 1.250,00\nTUNAI 2.000",
+    1250,
+    "2026-10-01",
+    "Belanja"
+  ],
+  [
+    "diskon",
+    "ALFAMART\n02-10-26\nSUBTOTAL 100.000\nDISKON 10.000\nTOTAL BAYAR 90.000\nKEMBALI 10.000",
+    90000,
+    "2026-10-02",
+    "Belanja"
+  ],
+  [
+    "ewallet",
+    "GOPAY\n03/10/2026\nMerchant Kopi Pagi\nTOTAL PEMBAYARAN Rp 35.000\nSALDO 2.000.000",
+    35000,
+    "2026-10-03",
+    "Makanan"
+  ],
+  [
+    "online",
+    "TOKOPEDIA\n04/10/2026\nGRAND TOTAL Rp 1.250.000\nTRANSFER 1.250.000",
+    1250000,
+    "2026-10-04",
+    "Belanja"
+  ],
+  [
+    "apotek",
+    "APOTEK SEHAT\n05/10/2026\nObat 2 x 15.000\nJUMLAH BAYAR 30.000\nDEBIT",
+    30000,
+    "2026-10-05",
+    "Kesehatan"
+  ],
+  [
+    "tagihan",
+    "PLN\n06/10/2026\nTAGIHAN AKHIR 200.000\nDANA",
+    200000,
+    "2026-10-06",
+    "Tagihan"
+  ],
+  [
+    "coffee",
+    "KOPI PAGI\n7 Oktober 2026\nLatte 1 x 25.000\nTOTAL\n25.000\nQRIS",
+    25000,
+    "2026-10-07",
+    "Makanan"
+  ],
+  [
+    "shell",
+    "SHELL\n09/10/2026\nTOTAL ITEM 1\nTOTAL 75.000\nTUNAI 100.000\nKEMBALI 25.000",
+    75000,
+    "2026-10-09",
+    "Transportasi"
+  ],
+  [
+    "fallback",
+    "WARUNG MAKAN\n10/10/2026\nSUBTOTAL 40.000\nPAJAK 4.400\nDISKON 5.000",
+    39400,
+    "2026-10-10",
+    "Makanan"
+  ]
+]

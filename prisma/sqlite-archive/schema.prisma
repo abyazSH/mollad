@@ -1,0 +1,98 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+enum WalletKind {
+  CASH
+  BANK
+  EWALLET
+}
+model User {
+  id String @id @default(cuid())
+  name String
+  email String @unique
+  passwordHash String
+  createdAt DateTime @default(now())
+  wallets Wallet[]
+  categories Category[]
+  transactions Transaction[]
+  budgets Budget[]
+  receipts Receipt[]
+}
+model Wallet {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  kind WalletKind @default(CASH)
+  initialBalance Int @default(0)
+  transactions Transaction[] @relation("SourceWallet")
+  incoming Transaction[] @relation("DestinationWallet")
+  @@index([userId])
+}
+model Category {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name String
+  color String @default("#10B981")
+  transactions Transaction[]
+  budgets Budget[]
+  @@unique([userId, name])
+}
+model Transaction {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  walletId String
+  wallet Wallet @relation("SourceWallet", fields: [walletId], references: [id], onDelete: Restrict)
+  destinationWalletId String?
+  destinationWallet Wallet? @relation("DestinationWallet", fields: [destinationWalletId], references: [id], onDelete: Restrict)
+  categoryId String?
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  type TransactionType
+  amount Int
+  date DateTime
+  merchant String @default("")
+  note String @default("")
+  createdAt DateTime @default(now())
+  receipt Receipt?
+  @@index([userId, date])
+  @@index([userId, categoryId])
+}
+model Budget {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  month String
+  amount Int
+  @@unique([userId, categoryId, month])
+}
+model Receipt {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  path String
+  rawText String @default("")
+  extracted Json?
+  confidence Float @default(0)
+  transactionId String? @unique
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  @@index([userId])
+}
+model RateLimit {
+  key String @id
+  count Int
+  expiresAt DateTime
+}
