@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Text } from '@/components/language-provider';
 import { useRouter } from 'next/navigation';
 import {
   Plus,
@@ -65,10 +66,14 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">SATU TEMPAT, SEMUA AKUN</span>
-          <h1 className="page-title">Dompetmu.</h1>
+          <span className="eyebrow">
+            <Text>{'SATU TEMPAT, SEMUA AKUN'}</Text>
+          </span>
+          <h1 className="page-title">
+            <Text>{'Dompetmu.'}</Text>
+          </h1>
           <p className="text-sm text-muted">
-            Kenali saldo di setiap sudut keuanganmu.
+            <Text>{'Kenali saldo di setiap sudut keuanganmu.'}</Text>
           </p>
         </div>
         <button
@@ -79,17 +84,20 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
           }}
         >
           <Plus size={16} />
-          Tambah dompet
+          <Text>{'Tambah dompet'}</Text>
         </button>
       </div>
-      <div className="mb-7 rounded-2xl bg-brand-mint p-7 text-ink">
-        <p className="text-xs text-muted">Total saldo semua dompet</p>
+      <div className="balance-hero mb-7 rounded-2xl p-7">
+        <p className="text-xs text-muted">
+          <Text>{'Total saldo semua dompet'}</Text>
+        </p>
         <p className="mt-3 text-3xl font-extrabold tabular-nums">
           {formatRupiah(wallets.reduce((sum, w) => sum + w.balance, 0))}
         </p>
         <p className="mt-4 flex items-center gap-2 text-xs text-ink">
           <ArrowUpRight size={14} />
-          {wallets.length} dompet terhubung dengan catatanmu
+          {wallets.length}
+          <Text>{'dompet terhubung dengan catatanmu'}</Text>
         </p>
       </div>
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -107,7 +115,7 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
                   <Icon size={21} />
                 </div>
                 <span className="rounded-full bg-canvas px-3 py-1 text-[10px] font-bold text-muted">
-                  {walletLabels[w.kind]}
+                  <Text>{walletLabels[w.kind]}</Text>
                 </span>
               </div>
               <h2 className="mt-5 text-base font-bold">{w.name}</h2>
@@ -116,7 +124,8 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
               </p>
               <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
                 <span className="text-xs text-muted">
-                  Awal {formatRupiah(w.initialBalance)}
+                  <Text>{'Awal'}</Text>
+                  {formatRupiah(w.initialBalance)}
                 </span>
                 <div className="flex gap-2">
                   <button
@@ -148,8 +157,12 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
       {!wallets.length && (
         <div className="card empty">
           <Wallet size={32} />
-          <h2 className="font-bold text-ink">Uangmu tinggal di mana?</h2>
-          <p>Tambahkan dompet pertama, misalnya Tunai atau Bank.</p>
+          <h2 className="font-bold text-ink">
+            <Text>{'Uangmu tinggal di mana?'}</Text>
+          </h2>
+          <p>
+            <Text>{'Tambahkan dompet pertama, misalnya Tunai atau Bank.'}</Text>
+          </p>
         </div>
       )}
       {edit && (
@@ -159,7 +172,7 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
         >
           <form method="post" onSubmit={submit} className="space-y-5">
             <label>
-              Nama dompet
+              <Text>{'Nama dompet'}</Text>
               <input
                 name="name"
                 required
@@ -169,15 +182,21 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
               />
             </label>
             <label>
-              Jenis
+              <Text>{'Jenis'}</Text>
               <select name="kind" defaultValue={edit.kind}>
-                <option value="CASH">Tunai</option>
-                <option value="BANK">Bank</option>
-                <option value="EWALLET">E-wallet</option>
+                <option value="CASH">
+                  <Text>{'Tunai'}</Text>
+                </option>
+                <option value="BANK">
+                  <Text>{'Bank'}</Text>
+                </option>
+                <option value="EWALLET">
+                  <Text>{'E-wallet'}</Text>
+                </option>
               </select>
             </label>
             <label>
-              Saldo awal (Rp)
+              <Text>{'Saldo awal (Rp)'}</Text>
               <input
                 name="initialBalance"
                 type="number"
@@ -189,8 +208,11 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
               />
             </label>
             <p className="text-xs leading-5 text-muted">
-              Saldo saat ini dihitung dari saldo awal ditambah pemasukan,
-              dikurangi pengeluaran, dan perpindahan dana.
+              <Text>
+                {
+                  'Saldo saat ini dihitung dari saldo awal ditambah pemasukan, dikurangi pengeluaran, dan perpindahan dana.'
+                }
+              </Text>
             </p>
             {error && (
               <p role="alert" className="error-box">
@@ -198,7 +220,7 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
               </p>
             )}
             <button className="button w-full" disabled={busy}>
-              {busy ? 'Menyimpan…' : 'Simpan dompet'}
+              <Text>{busy ? 'Menyimpan…' : 'Simpan dompet'}</Text>
             </button>
           </form>
         </Modal>
@@ -206,8 +228,12 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
       {removing && (
         <Modal title="Hapus dompet?" close={() => setRemoving(null)}>
           <p className="mb-5 text-sm text-muted">
-            {removing.name} akan dihapus. Dompet yang masih memiliki transaksi
-            tidak dapat dihapus.
+            {removing.name}
+            <Text>
+              {
+                'akan dihapus. Dompet yang masih memiliki transaksi tidak dapat dihapus.'
+              }
+            </Text>
           </p>
           {error && (
             <p role="alert" className="error-box mb-4">
@@ -215,7 +241,7 @@ export function WalletManager({ wallets }: { wallets: Item[] }) {
             </p>
           )}
           <button className="button" onClick={remove} disabled={busy}>
-            Hapus dompet
+            <Text>{'Hapus dompet'}</Text>
           </button>
         </Modal>
       )}

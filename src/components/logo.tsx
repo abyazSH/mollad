@@ -17,7 +17,7 @@ export function Logo({
         role="img"
         aria-label="Logo mollad"
       >
-        <rect width="64" height="64" rx="20" fill="#46B4A0" />
+        <rect width="64" height="64" rx="20" fill="var(--primary)" />
         <path
           d="M16 44V29a8 8 0 0 1 16 0v15M32 29a8 8 0 0 1 16 0v15"
           fill="none"
@@ -26,7 +26,7 @@ export function Logo({
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-        <circle cx="48" cy="15" r="5" fill="#FFA6C1" />
+        <circle cx="48" cy="15" r="5" fill="var(--logo-dot)" />
       </svg>
       {variant === 'full' && (
         <span className="text-[28px] font-extrabold tracking-[-.045em] text-inherit">

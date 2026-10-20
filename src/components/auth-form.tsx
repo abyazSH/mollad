@@ -25,7 +25,7 @@ export function AuthForm({ register = false }: { register?: boolean }) {
       );
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
-      window.location.assign('/');
+      window.location.assign('/dashboard');
     } catch (error) {
       setError(
         error instanceof TypeError
@@ -126,7 +126,7 @@ export function AuthForm({ register = false }: { register?: boolean }) {
             {register ? 'Sudah punya akun?' : 'Belum punya akun?'}{' '}
             <Link
               className="font-bold text-emerald-700 dark:text-emerald-300"
-              href={register ? '/login' : '/daftar'}
+              href={register ? '/login' : '/register'}
             >
               {register ? 'Masuk' : 'Daftar sekarang'}
             </Link>

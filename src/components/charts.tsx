@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Text } from '@/components/language-provider';
 import {
   ResponsiveContainer,
   PieChart,
@@ -13,6 +14,7 @@ import {
   CartesianGrid,
 } from 'recharts';
 import { formatRupiah } from '@/lib/money';
+import { categoryColorStyle } from '@/lib/category-colors';
 type Point = { label: string; income: number; expense: number };
 type Category = { name: string; color: string; value: number };
 export function FinanceCharts({
@@ -29,14 +31,18 @@ export function FinanceCharts({
   const [period, setPeriod] = useState('daily');
   return (
     <div className="grid gap-6 xl:grid-cols-[1.65fr_1fr]">
-      <section className="card min-w-0 p-6">
+      <section className="card accent-card min-w-0 p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-extrabold">Arus keuangan</h2>
+            <h2 className="text-sm font-extrabold">
+              <Text>{'Arus keuangan'}</Text>
+            </h2>
             <p className="mt-1 text-[11px] text-muted">
-              {period === 'daily'
-                ? 'Pemasukan dan pengeluaran pada bulan laporan.'
-                : 'Pemasukan dan pengeluaran selama enam bulan hingga bulan laporan.'}
+              <Text>
+                {period === 'daily'
+                  ? 'Pemasukan dan pengeluaran pada bulan laporan.'
+                  : 'Pemasukan dan pengeluaran selama enam bulan hingga bulan laporan.'}
+              </Text>
             </p>
           </div>
           <div className="flex rounded-lg bg-canvas p-1 text-[10px] font-bold">
@@ -50,7 +56,7 @@ export function FinanceCharts({
               onClick={() => setPeriod('daily')}
               aria-pressed={period === 'daily'}
             >
-              Harian
+              <Text>{'Harian'}</Text>
             </button>
             <button
               className={
@@ -62,18 +68,18 @@ export function FinanceCharts({
               onClick={() => setPeriod('monthly')}
               aria-pressed={period === 'monthly'}
             >
-              Bulanan
+              <Text>{'Bulanan'}</Text>
             </button>
           </div>
         </div>
         <div className="mb-5 mt-6 flex gap-5 text-[10px] text-muted">
           <span className="flex items-center gap-2">
-            <i className="h-2 w-2 rounded-full bg-emerald-500" />
-            Pemasukan
+            <i className="h-2 w-2 rounded-full bg-[var(--chart-income)]" />
+            <Text>{'Pemasukan'}</Text>
           </span>
           <span className="flex items-center gap-2">
-            <i className="h-2 w-2 rounded-full bg-brand-pink" />
-            Pengeluaran
+            <i className="h-2 w-2 rounded-full bg-[var(--chart-expense)]" />
+            <Text>{'Pengeluaran'}</Text>
           </span>
         </div>
         <div
@@ -88,8 +94,16 @@ export function FinanceCharts({
             >
               <defs>
                 <linearGradient id="incomeFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#46B4A0" stopOpacity={0.22} />
-                  <stop offset="1" stopColor="#46B4A0" stopOpacity={0} />
+                  <stop
+                    offset="0"
+                    stopColor="var(--chart-income)"
+                    stopOpacity={0.22}
+                  />
+                  <stop
+                    offset="1"
+                    stopColor="var(--chart-income)"
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <CartesianGrid
@@ -122,7 +136,10 @@ export function FinanceCharts({
                   border: '1px solid var(--line)',
                   borderRadius: 12,
                   fontSize: 11,
+                  color: 'var(--ink)',
                 }}
+                labelStyle={{ color: 'var(--ink)' }}
+                itemStyle={{ color: 'var(--ink)' }}
                 formatter={(value: number) => formatRupiah(value)}
               />
               <Area
@@ -130,8 +147,8 @@ export function FinanceCharts({
                 type="monotone"
                 dataKey="income"
                 name="Pemasukan"
-                stroke="#46B4A0"
-                strokeWidth={2.5}
+                stroke="var(--chart-income)"
+                strokeWidth={3}
                 fill="url(#incomeFill)"
               />
               <Area
@@ -139,23 +156,31 @@ export function FinanceCharts({
                 type="monotone"
                 dataKey="expense"
                 name="Pengeluaran"
-                stroke="#FFA6C1"
+                stroke="var(--chart-expense)"
                 strokeDasharray="5 3"
-                strokeWidth={2}
+                strokeWidth={3}
                 fill="transparent"
               />
             </AreaChart>
           </ResponsiveContainer>
         </div>
         <details className="mt-3 text-[10px] text-muted">
-          <summary className="cursor-pointer">Lihat angka grafik</summary>
+          <summary className="cursor-pointer">
+            <Text>{'Lihat angka grafik'}</Text>
+          </summary>
           <div className="mt-2 max-h-40 overflow-y-auto">
             <table className="w-full text-left">
               <thead>
                 <tr>
-                  <th>Periode</th>
-                  <th>Pemasukan</th>
-                  <th>Pengeluaran</th>
+                  <th>
+                    <Text>{'Periode'}</Text>
+                  </th>
+                  <th>
+                    <Text>{'Pemasukan'}</Text>
+                  </th>
+                  <th>
+                    <Text>{'Pengeluaran'}</Text>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -172,13 +197,17 @@ export function FinanceCharts({
         </details>
       </section>
       <section className="card min-w-0 p-6">
-        <h2 className="text-sm font-extrabold">Pengeluaran per kategori</h2>
+        <h2 className="text-sm font-extrabold">
+          <Text>{'Pengeluaran per kategori'}</Text>
+        </h2>
         <p className="mt-1 text-[11px] text-muted">
-          Pengeluaran menurut kategori.
+          <Text>{'Pengeluaran menurut kategori.'}</Text>
         </p>
         {!categories.length ? (
           <div className="empty">
-            <p>Belum ada pengeluaran pada bulan laporan.</p>
+            <p>
+              <Text>{'Belum ada pengeluaran pada bulan laporan.'}</Text>
+            </p>
           </div>
         ) : (
           <>
@@ -195,7 +224,12 @@ export function FinanceCharts({
                     stroke="none"
                   >
                     {categories.map((c) => (
-                      <Cell key={c.name} fill={c.color} />
+                      <Cell
+                        key={c.name}
+                        className="category-color"
+                        style={categoryColorStyle(c.color)}
+                        fill="var(--category-display)"
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -205,12 +239,17 @@ export function FinanceCharts({
                       borderColor: 'var(--line)',
                       borderRadius: 12,
                       fontSize: 11,
+                      color: 'var(--ink)',
                     }}
+                    labelStyle={{ color: 'var(--ink)' }}
+                    itemStyle={{ color: 'var(--ink)' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-                <p className="text-[9px] text-muted">TOTAL PENGELUARAN</p>
+                <p className="text-[9px] text-muted">
+                  <Text>{'TOTAL PENGELUARAN'}</Text>
+                </p>
                 <p className="mt-1 text-[12px] font-extrabold tabular-nums">
                   {formatRupiah(expense)}
                 </p>
@@ -223,8 +262,8 @@ export function FinanceCharts({
                   className="flex items-center gap-2 text-[11px]"
                 >
                   <span
-                    className="h-2 w-2 rounded-full"
-                    style={{ background: c.color }}
+                    className="category-color h-2 w-2 rounded-full"
+                    style={categoryColorStyle(c.color)}
                   />
                   <span className="flex-1 text-muted">{c.name}</span>
                   <span className="font-bold tabular-nums">

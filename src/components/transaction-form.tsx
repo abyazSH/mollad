@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Text } from '@/components/language-provider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ApiError, mutate } from '@/lib/client';
@@ -68,19 +69,21 @@ export function TransactionForm({
   if (!wallets.length || !categories.length)
     return (
       <div className="empty">
-        <p>Buat dompet dan kategori terlebih dahulu.</p>
+        <p>
+          <Text>{'Buat dompet dan kategori terlebih dahulu.'}</Text>
+        </p>
         <Link
           className="button"
-          href={!wallets.length ? '/dompet' : '/kategori'}
+          href={!wallets.length ? '/dompet' : '/dompet#kategori'}
         >
-          Siapkan data
+          <Text>{'Siapkan data'}</Text>
         </Link>
       </div>
     );
   const hint = (field: string) =>
     lowConfidence.includes(field) ? (
       <span className="mt-1 block text-[11px] font-medium text-amber-700 dark:text-amber-300">
-        Perlu diperiksa kembali
+        <Text>{'Perlu diperiksa kembali'}</Text>
       </span>
     ) : null;
   return (
@@ -96,19 +99,25 @@ export function TransactionForm({
       }}
     >
       <label>
-        Jenis transaksi
+        <Text>{'Jenis transaksi'}</Text>
         <select
           value={type}
           onChange={(e) => setType(e.target.value as typeof type)}
         >
-          <option value="EXPENSE">Pengeluaran</option>
-          <option value="INCOME">Pemasukan</option>
-          <option value="TRANSFER">Transfer</option>
+          <option value="EXPENSE">
+            <Text>{'Pengeluaran'}</Text>
+          </option>
+          <option value="INCOME">
+            <Text>{'Pemasukan'}</Text>
+          </option>
+          <option value="TRANSFER">
+            <Text>{'Transfer'}</Text>
+          </option>
         </select>
       </label>
       <div className="field-grid">
         <label>
-          Nominal (Rp)
+          <Text>{'Nominal (Rp)'}</Text>
           <input
             name="amount"
             type="number"
@@ -122,7 +131,7 @@ export function TransactionForm({
           {hint('total')}
         </label>
         <label>
-          Tanggal
+          <Text>{'Tanggal'}</Text>
           <input
             name="date"
             type="date"
@@ -134,7 +143,7 @@ export function TransactionForm({
       </div>
       <div className="field-grid">
         <label>
-          {type === 'TRANSFER' ? 'Dompet asal' : 'Dompet'}
+          <Text>{type === 'TRANSFER' ? 'Dompet asal' : 'Dompet'}</Text>
           <select
             name="walletId"
             defaultValue={initial.walletId || wallets[0].id}
@@ -148,13 +157,15 @@ export function TransactionForm({
         </label>
         {type === 'TRANSFER' ? (
           <label>
-            Dompet tujuan
+            <Text>{'Dompet tujuan'}</Text>
             <select
               name="destinationWalletId"
               required
               defaultValue={initial.destinationWalletId || ''}
             >
-              <option value="">Pilih dompet tujuan</option>
+              <option value="">
+                <Text>{'Pilih dompet tujuan'}</Text>
+              </option>
               {wallets.map((w) => (
                 <option key={w.id} value={w.id}>
                   {w.name}
@@ -164,13 +175,15 @@ export function TransactionForm({
           </label>
         ) : (
           <label>
-            Kategori
+            <Text>{'Kategori'}</Text>
             <select
               name="categoryId"
               required
               defaultValue={initial.categoryId || ''}
             >
-              <option value="">Pilih kategori</option>
+              <option value="">
+                <Text>{'Pilih kategori'}</Text>
+              </option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.name}
@@ -182,7 +195,7 @@ export function TransactionForm({
       </div>
       {type !== 'TRANSFER' && (
         <label>
-          Merchant
+          <Text>{'Merchant'}</Text>
           <input
             name="merchant"
             maxLength={120}
@@ -193,7 +206,7 @@ export function TransactionForm({
         </label>
       )}
       <label>
-        Catatan
+        <Text>{'Catatan'}</Text>
         <textarea
           name="note"
           rows={2}
@@ -204,14 +217,20 @@ export function TransactionForm({
       </label>
       {type === 'TRANSFER' && (
         <p className="rounded-xl bg-canvas p-3 text-xs leading-5 text-muted">
-          Transfer mengubah saldo kedua dompet dan tidak masuk laporan
-          pemasukan/pengeluaran.
+          <Text>
+            {
+              'Transfer mengubah saldo kedua dompet dan tidak masuk laporan pemasukan/pengeluaran.'
+            }
+          </Text>
         </p>
       )}
       {initial.receiptId && (
         <p className="text-xs text-muted">
-          Foto hanya untuk review. Setelah Simpan, data transaksi tersimpan
-          tanpa gambar struk.
+          <Text>
+            {
+              'Foto hanya untuk review. Setelah Simpan, data transaksi tersimpan tanpa gambar struk.'
+            }
+          </Text>
         </p>
       )}
       {error && (
@@ -228,12 +247,15 @@ export function TransactionForm({
             checked={allowDuplicate}
             onChange={(e) => setAllowDuplicate(e.target.checked)}
           />
-          Saya sudah memeriksa. Ini transaksi berbeda dan tetap ingin
-          menyimpannya.
+          <Text>
+            {
+              'Saya sudah memeriksa. Ini transaksi berbeda dan tetap ingin menyimpannya.'
+            }
+          </Text>
         </label>
       )}
       <button className="button button-primary w-full" disabled={busy}>
-        {busy ? 'Menyimpan…' : 'Simpan transaksi'}
+        <Text>{busy ? 'Menyimpan…' : 'Simpan transaksi'}</Text>
       </button>
     </form>
   );

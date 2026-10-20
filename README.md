@@ -17,7 +17,19 @@ npm run dev
 
 Buka http://localhost:3000. Script init-env membuat .env dari .env.example dengan secret acak, tanpa menimpa konfigurasi yang sudah ada. Alternatif: salin .env.example ke .env dan isi NEXTAUTH_SECRET minimal 32 karakter.
 
-Buka /daftar untuk membuat akun baru. Jika membutuhkan data contoh pada branch pengembangan khusus, jalankan npm run db:seed. Demo: **demo@m.local** / **DemoM2026!**. Seed membuat satu akun, dua dompet, 30 transaksi dan tiga anggaran bulan saat ini; menjalankan ulang tidak menimpa data. Jangan menambahkan akun demo dengan kata sandi publik ini pada branch produksi.
+Buka /register (atau /daftar) untuk membuat akun baru. Setelah masuk, pengguna diarahkan ke /dashboard. Jika membutuhkan data contoh pada branch pengembangan khusus, jalankan npm run db:seed. Demo: **demo@m.local** / **DemoM2026!**. Seed membuat satu akun, dua dompet, 30 transaksi dan tiga anggaran bulan saat ini; menjalankan ulang tidak menimpa data. Jangan menambahkan akun demo dengan kata sandi publik ini pada branch produksi.
+
+## Hak akses halaman
+
+| Halaman                                                               | Tamu / belum login                         | Pengguna dengan sesi valid |
+| --------------------------------------------------------------------- | ------------------------------------------ | -------------------------- |
+| /                                                                     | Pengenalan website dan tautan masuk/daftar | Dialihkan ke /dashboard    |
+| /login, /register, /daftar                                            | Form autentikasi                           | Dialihkan ke /dashboard    |
+| /dashboard, /dompet, /transaksi, /kategori, /anggaran, /scan, /profil | Dialihkan ke /                             | Halaman aplikasi pribadi   |
+
+Pemeriksaan dilakukan di server dengan memverifikasi sesi dan keberadaan akun. Cookie palsu, kedaluwarsa, atau milik akun yang sudah dihapus tidak membuka halaman aplikasi. Endpoint data tetap mengembalikan 401 saat tidak ada sesi; semua query data bisnis tetap dibatasi pemilik. API login/register menolak sesi yang sudah aktif dengan 409 ALREADY_AUTHENTICATED. Logout menghapus cookie dan kembali ke halaman pengenalan. Tidak ada perubahan data atau skema database untuk pembagian halaman ini.
+
+Tes `e2e/access.spec.ts` dan `e2e/mobile.spec.ts` hanya membaca halaman/API publik atau memblokir request autentikasi; tes ini dapat dijalankan tanpa membuat akun atau transaksi. Tes e2e lainnya yang membuat data tetap memerlukan database pengujian khusus.
 
 ## Koneksi Neon
 
@@ -73,7 +85,7 @@ npm run build
 npm run test:e2e:production
 ```
 
-Playwright memerlukan npx playwright install chromium. Uji browser mencakup auth, keuangan/isolasi akun, laporan/CSV, dan OCR Tesseract nyata. Jalankan tes saat port 3000 bebas. Tes membuat akun dengan email example.test pada database lokal yang dikonfigurasi; gunakan database pengujian sendiri untuk menghindari data uji pada database pribadi.
+Playwright memerlukan npx playwright install chromium. Uji browser mencakup auth, keuangan/isolasi akun, laporan/CSV, dan OCR Tesseract nyata. Playwright memakai port 3107 secara default (ubah dengan PLAYWRIGHT_PORT) dan tidak memakai ulang server lain kecuali E2E_REUSE_SERVER=1. Tes membuat akun dengan email example.test pada database lokal yang dikonfigurasi; gunakan database pengujian sendiri untuk menghindari data uji pada database pribadi.
 
 ## Struktur
 
@@ -106,7 +118,7 @@ git push -u origin main
 
 Ganti USERNAME dan REPOSITORY. Periksa daftar berkas sebelum commit: `.env`, database lokal, foto lama di uploads, node_modules, dan cache tidak boleh ikut. `.env.example` berisi placeholder dan boleh disimpan di GitHub. Jika sebuah secret pernah terunggah, hapus dari riwayat Git dan ganti secret tersebut.
 
-Workflow `.github/workflows/ci.yml` memeriksa lint, TypeScript, unit test, format, build, dan tiga pengujian browser autentikasi pada lebar HP 320/390/430 px saat push/pull request. Pengujian HP memakai halaman publik dan memblokir permintaan autentikasi sebelum dikirim. Workflow ini tidak memakai secret Neon, tidak menjalankan migrasi, tidak menulis data produksi, dan tidak melakukan deployment. Untuk pembaruan website otomatis, hubungkan repository ke layanan hosting dan atur variabel lingkungan di layanan itu.
+Workflow `.github/workflows/ci.yml` memeriksa lint, TypeScript, unit test, format, build, dan pengujian akses tamu serta autentikasi pada lebar HP 320/390/430 px saat push/pull request. Pengujian HP memakai halaman publik dan memblokir permintaan autentikasi sebelum dikirim. Workflow ini tidak memakai secret Neon, tidak menjalankan migrasi, tidak menulis data produksi, dan tidak melakukan deployment. Untuk pembaruan website otomatis, hubungkan repository ke layanan hosting dan atur variabel lingkungan di layanan itu.
 
 Mengunggah kode ke GitHub berbeda dengan menjalankan aplikasi online. GitHub Pages tidak menjalankan backend Node mollad. Sebelum memakai Vercel, sesuaikan upload struk 8 MB terhadap batas request fungsi 4,5 MB, serta cache bahasa Tesseract yang saat ini ditulis ke `.cache/tesseract`. Hosting Node yang menyediakan filesystem writable sesuai kebutuhan OCR juga dapat digunakan. Set `APP_URL` ke origin website dan simpan koneksi Neon serta secret sesi pada pengaturan hosting.
 
@@ -117,3 +129,11 @@ Gunakan server Node untuk OCR; database berada di Neon. Cache bahasa OCR dapat d
 Skema aktif menggunakan PostgreSQL melalui Prisma 6 dengan directUrl untuk migrasi. Maksimum nominal satu transaksi/saldo awal Rp2 miliar; agregat dihitung sebagai integer JavaScript.
 
 Parser bersifat heuristik: struk buram, format tidak lazim, item kompleks, tanggal internasional, atau potongan ambigu mungkin perlu koreksi. Transfer tidak dihitung sebagai pemasukan/pengeluaran. Penghapusan dompet/kategori terpakai membutuhkan penyelesaian transaksi terkait. Belum ada reset password, email verification, sinkronisasi bank, atau backup otomatis.
+
+### Navigasi dan profil
+
+Navigasi aplikasi terdiri dari Ringkasan, Transaksi, Dompet, Anggaran, dan Profil, tanpa header atas. Halaman Dompet juga memuat pengelolaan kategori. URL lama /kategori dialihkan ke /dompet#kategori. Scan struk tersedia di dialog Catat transaksi melalui tombol Scan struk; URL lama /scan membuka dialog ini di /transaksi?catat=scan. Foto tetap sementara dan hasil OCR harus dikonfirmasi sebelum transaksi disimpan.
+
+Profil (/profil) memuat identitas akun, logout, pilihan Bahasa Indonesia/English, mode terang/gelap/sistem, dan ekspor CSV dengan filter. Preferensi bahasa dan tema disimpan pada browser perangkat ini; nama kategori, catatan pengguna, format Rupiah/tanggal Indonesia, pesan validasi server, serta halaman publik tetap menggunakan bahasa aslinya. Bahasa Inggris berlaku pada label utama ruang keuangan dan pengaturan.
+
+Tes e2e/workspace.spec.ts memerlukan E2E_SESSION_TOKEN akun uji yang sudah memiliki dompet dan kategori. Tes ini memblokir upload dan penyimpanan transaksi menggunakan fixture serta tidak membuat data keuangan di database. Jangan memasukkan token sesi ke Git.

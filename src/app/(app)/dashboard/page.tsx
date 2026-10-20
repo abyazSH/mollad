@@ -1,9 +1,9 @@
 import Link from 'next/link';
+import { Text } from '@/components/language-provider';
 import {
   ArrowUpRight,
   ArrowDownLeft,
   ArrowRight,
-  ScanLine,
   Plus,
   Wallet,
   ArrowLeftRight,
@@ -24,7 +24,12 @@ export default async function Page({
   const user = await requireUser();
   const params = await searchParams;
   const valid = monthSchema.safeParse(params.month || today().slice(0, 7));
-  if (!valid.success) return <p className="error-box">Bulan tidak valid.</p>;
+  if (!valid.success)
+    return (
+      <p className="error-box">
+        <Text>{'Bulan tidak valid.'}</Text>
+      </p>
+    );
   const month = valid.data;
   const monthLabel = new Intl.DateTimeFormat('id-ID', {
     month: 'long',
@@ -55,16 +60,19 @@ export default async function Page({
       <div className="page-heading">
         <div>
           <span className="eyebrow">{monthLabel}</span>
-          <h1 className="page-title">Ringkasan keuangan</h1>
+          <h1 className="page-title">
+            <Text>{'Ringkasan keuangan'}</Text>
+          </h1>
           <p className="text-sm text-muted">
-            Halo, {user.name.split(' ')[0]}. Lihat saldo dan arus uangmu di
-            sini.
+            <Text>{'Halo,'}</Text>
+            {user.name.split(' ')[0]}
+            <Text>{'. Lihat saldo dan arus uangmu di sini.'}</Text>
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
-          <form action="/" className="flex items-end gap-2">
+          <form action="/dashboard" className="flex items-end gap-2">
             <label className="text-xs" htmlFor="dashboard-month">
-              Bulan laporan
+              <Text>{'Bulan laporan'}</Text>
               <input
                 id="dashboard-month"
                 type="month"
@@ -80,7 +88,7 @@ export default async function Page({
           </form>
           <Link href="/transaksi" className="button">
             <Plus size={16} />
-            Catat transaksi
+            <Text>{'Catat transaksi'}</Text>
           </Link>
         </div>
       </div>
@@ -89,37 +97,43 @@ export default async function Page({
           className="card mb-7 border-emerald-300 p-6 dark:border-emerald-800"
           aria-labelledby="getting-started"
         >
-          <span className="eyebrow">MULAI MENGGUNAKAN MOLLAD</span>
+          <span className="eyebrow">
+            <Text>{'MULAI MENGGUNAKAN MOLLAD'}</Text>
+          </span>
           <h2 id="getting-started" className="mt-2 text-lg font-bold">
-            Tambahkan dompet pertamamu
+            <Text>{'Tambahkan dompet pertamamu'}</Text>
           </h2>
           <p className="mt-2 max-w-xl text-sm text-muted">
-            Buat dompet Tunai, Bank, atau E-wallet dan isi saldo awalnya.
-            Setelah itu, catat transaksi secara manual atau dari foto struk.
+            <Text>
+              {
+                'Buat dompet Tunai, Bank, atau E-wallet dan isi saldo awalnya. Setelah itu, catat transaksi secara manual atau dari foto struk.'
+              }
+            </Text>
           </p>
           <Link href="/dompet" className="button button-primary mt-4">
             <Plus size={16} />
-            Tambah dompet
+            <Text>{'Tambah dompet'}</Text>
           </Link>
         </section>
       )}
-      <div className="mb-7 grid gap-5 xl:grid-cols-[1.7fr_1fr]">
-        <section className="relative overflow-hidden rounded-2xl bg-brand-mint p-7 text-ink sm:p-8">
-          <div className="absolute -right-16 -top-24 h-80 w-80 rounded-full border-[35px] border-emerald-400/[.05]" />
+      <div className="mb-7">
+        <section className="balance-hero relative overflow-hidden rounded-2xl p-7 sm:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-24 h-80 w-80 rounded-full border-[35px] border-white/10" />
           <div className="relative">
             <div className="flex items-center justify-between">
               <p className="flex items-center gap-2 text-xs text-muted">
                 <Wallet size={16} />
-                Total saldo saat ini
+                <Text>{'Total saldo saat ini'}</Text>
               </p>
-              <span className="rounded-full border border-line px-3 py-1 text-[10px] text-muted">
-                {wallets.length} dompet
+              <span className="hero-divider rounded-full border px-3 py-1 text-[10px]">
+                {wallets.length}
+                <Text>{'dompet'}</Text>
               </span>
             </div>
             <p className="my-5 break-words text-3xl font-extrabold tracking-tight tabular-nums sm:text-[42px]">
               {formatRupiah(balance)}
             </p>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-line pt-5">
+            <div className="hero-divider flex flex-wrap items-center gap-x-6 gap-y-3 border-t pt-5">
               {wallets.slice(0, 3).map((w) => (
                 <div key={w.id}>
                   <p className="text-[10px] text-muted">{w.name}</p>
@@ -132,38 +146,12 @@ export default async function Page({
                 href="/dompet"
                 className="ml-auto flex items-center gap-2 text-[10px] font-bold text-ink"
               >
-                {wallets.length ? 'Lihat dompet' : 'Tambah dompet'}
+                <Text>{wallets.length ? 'Lihat dompet' : 'Tambah dompet'}</Text>
                 <ArrowUpRight size={14} />
               </Link>
             </div>
           </div>
         </section>
-        <Link
-          href="/scan"
-          className="group flex flex-col justify-between rounded-2xl border border-emerald-200 bg-emerald-50 p-7 dark:border-emerald-900 dark:bg-emerald-950/50"
-        >
-          <div className="flex items-center justify-between">
-            <span className="rounded-xl bg-white p-3 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">
-              <ScanLine size={25} />
-            </span>
-            <ArrowUpRight
-              className="text-emerald-700 dark:text-emerald-300"
-              size={21}
-            />
-          </div>
-          <div>
-            <span className="mt-5 inline-block text-[9px] font-extrabold tracking-widest text-emerald-800 dark:text-emerald-300">
-              CATAT DARI FOTO
-            </span>
-            <h2 className="mt-2 text-xl font-extrabold tracking-tight">
-              Scan struk belanja
-            </h2>
-            <p className="mt-2 max-w-[270px] text-xs leading-5 text-emerald-800 dark:text-emerald-200">
-              Unggah foto, periksa nominal dan tanggal, lalu simpan. Foto tidak
-              disimpan oleh mollad.
-            </p>
-          </div>
-        </Link>
       </div>
       <div className="mb-7 grid gap-4 sm:grid-cols-3">
         {[
@@ -179,19 +167,26 @@ export default async function Page({
             amount: stats.expense,
             caption: monthLabel,
             Icon: ArrowUpRight,
-            color: 'bg-brand-blush text-ink',
+            color: 'accent-soft-panel',
           },
           {
             label: 'Selisih',
             amount: stats.remainder,
             caption: 'Pemasukan − pengeluaran · ' + monthLabel,
             Icon: Wallet,
-            color: 'bg-brand-pink text-brand-onPrimary',
+            color: 'accent-soft-panel',
           },
         ].map((c) => (
-          <section key={c.label} className="card p-5">
+          <section
+            key={c.label}
+            className={
+              'card p-5 ' + (c.label === 'Pengeluaran' ? 'accent-card' : '')
+            }
+          >
             <div className="flex items-center justify-between">
-              <p className="text-[11px] text-muted">{c.label}</p>
+              <p className="text-[11px] text-muted">
+                <Text>{c.label}</Text>
+              </p>
               <span className={'rounded-lg p-2 ' + c.color}>
                 <c.Icon size={16} />
               </span>
@@ -207,26 +202,36 @@ export default async function Page({
       <div className="mt-7 grid gap-6 xl:grid-cols-[1.65fr_1fr]">
         <section className="card overflow-hidden">
           <div className="flex items-center justify-between p-6">
-            <h2 className="text-sm font-extrabold">Catatan terbaru</h2>
+            <h2 className="text-sm font-extrabold">
+              <Text>{'Catatan terbaru'}</Text>
+            </h2>
             <Link
               href="/transaksi"
               className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300"
             >
-              Lihat semua
+              <Text>{'Lihat semua'}</Text>
               <ArrowRight size={13} />
             </Link>
           </div>
           {!recent.length && (
             <div className="empty">
-              <p className="font-semibold text-ink">Belum ada transaksi</p>
+              <p className="font-semibold text-ink">
+                <Text>{'Belum ada transaksi'}</Text>
+              </p>
               <p>
-                Catat pemasukan atau pengeluaran untuk mulai melihat riwayatmu.
+                <Text>
+                  {
+                    'Catat pemasukan atau pengeluaran untuk mulai melihat riwayatmu.'
+                  }
+                </Text>
               </p>
               <Link
                 className="button button-secondary"
                 href={wallets.length ? '/transaksi' : '/dompet'}
               >
-                {wallets.length ? 'Catat transaksi' : 'Tambah dompet'}
+                <Text>
+                  {wallets.length ? 'Catat transaksi' : 'Tambah dompet'}
+                </Text>
               </Link>
             </div>
           )}
@@ -263,7 +268,9 @@ export default async function Page({
                     : '')
                 }
               >
-                {r.type === 'EXPENSE' ? '−' : r.type === 'INCOME' ? '+' : ''}
+                <Text>
+                  {r.type === 'EXPENSE' ? '−' : r.type === 'INCOME' ? '+' : ''}
+                </Text>
                 {formatRupiah(r.amount)}
               </p>
             </div>
@@ -271,22 +278,27 @@ export default async function Page({
         </section>
         <section className="card p-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-extrabold">Anggaran kategori</h2>
+            <h2 className="text-sm font-extrabold">
+              <Text>{'Anggaran kategori'}</Text>
+            </h2>
             <Link
               href={'/anggaran?month=' + month}
               className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300"
             >
-              Atur anggaran →
+              <Text>{'Atur anggaran →'}</Text>
             </Link>
           </div>
           <p className="mt-1 text-[11px] text-muted">
-            Pengeluaran dibandingkan batas anggaran · {monthLabel}
+            <Text>{'Pengeluaran dibandingkan batas anggaran ·'}</Text>
+            {monthLabel}
           </p>
           {!budgets.length && (
             <div className="empty">
-              <p>Belum ada anggaran bulan ini.</p>
+              <p>
+                <Text>{'Belum ada anggaran bulan ini.'}</Text>
+              </p>
               <Link className="button button-secondary" href="/anggaran">
-                Buat anggaran
+                <Text>{'Buat anggaran'}</Text>
               </Link>
             </div>
           )}
@@ -320,12 +332,14 @@ export default async function Page({
               <p className="text-[10px] text-muted">
                 {formatRupiah(b.spent)}{' '}
                 <span className="float-right">
-                  dari {formatRupiah(b.amount)}
+                  <Text>{'dari'}</Text>
+                  {formatRupiah(b.amount)}
                 </span>
               </p>
               {b.incomePercent != null && (
                 <p className="mt-2 text-xs text-muted">
-                  {b.incomePercent}% dari penghasilan bulan laporan
+                  {b.incomePercent}
+                  <Text>{'% dari penghasilan bulan laporan'}</Text>
                 </p>
               )}
               {b.status !== 'safe' && (
@@ -341,8 +355,12 @@ export default async function Page({
         </section>
       </div>
       <footer className="mt-8 flex justify-between text-[10px] text-muted">
-        <span>mollad · Atur uang, tanpa ribet.</span>
-        <span>Semua nominal dalam Rupiah</span>
+        <span>
+          <Text>{'mollad · Atur uang, tanpa ribet.'}</Text>
+        </span>
+        <span>
+          <Text>{'Semua nominal dalam Rupiah'}</Text>
+        </span>
       </footer>
     </>
   );

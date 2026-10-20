@@ -1,9 +1,10 @@
+import { testOrigin } from './test-origin';
 import { test, expect } from '@playwright/test';
 test('CRUD, transfer, saldo, dan isolasi data pengguna', async ({
   page,
   browser,
 }) => {
-  const headers = { origin: 'http://localhost:3000' };
+  const headers = { origin: testOrigin };
   const registered = await page.request.post('/api/auth/register', {
     headers,
     data: {
@@ -73,7 +74,7 @@ test('CRUD, transfer, saldo, dan isolasi data pengguna', async ({
   );
   const other = await browser.newContext();
   const registeredOther = await other.request.post(
-    'http://localhost:3000/api/auth/register',
+    testOrigin + '/api/auth/register',
     {
       headers,
       data: {
@@ -86,23 +87,23 @@ test('CRUD, transfer, saldo, dan isolasi data pengguna', async ({
   expect(registeredOther.status()).toBe(200);
   expect(
     (
-      await other.request.patch(
-        'http://localhost:3000/api/finance/transactions',
-        { headers, data: { ...base, id: expense.id } },
-      )
+      await other.request.patch(testOrigin + '/api/finance/transactions', {
+        headers,
+        data: { ...base, id: expense.id },
+      })
     ).status(),
   ).toBe(404);
   expect(
     (
-      await other.request.post(
-        'http://localhost:3000/api/finance/transactions',
-        { headers, data: base },
-      )
+      await other.request.post(testOrigin + '/api/finance/transactions', {
+        headers,
+        data: base,
+      })
     ).status(),
   ).toBe(404);
   expect(
     (
-      await other.request.delete('http://localhost:3000/api/finance/wallets', {
+      await other.request.delete(testOrigin + '/api/finance/wallets', {
         headers,
         data: { id: second.id },
       })

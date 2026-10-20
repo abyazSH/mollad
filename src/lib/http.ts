@@ -59,9 +59,40 @@ export function apiError(error: unknown) {
         { status: 409 },
       );
   }
+  let databaseDiagnostic: Record<string, string> | undefined;
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    const rawUrl = process.env.NEON_DATABASE_URL;
+    let databaseUrlState = rawUrl ? 'invalid' : 'missing';
+    if (rawUrl) {
+      try {
+        const url = new URL(rawUrl);
+        if (
+          ['postgres:', 'postgresql:'].includes(url.protocol) &&
+          url.hostname &&
+          url.pathname.length > 1
+        )
+          databaseUrlState = 'configured';
+      } catch {
+        /* Report only a classification, never the connection string. */
+      }
+    }
+    databaseDiagnostic = {
+      databaseUrlState,
+      prismaCode: /^P\d{4}$/.test(error.errorCode || '')
+        ? error.errorCode!
+        : 'UNSPECIFIED',
+      engineIssue:
+        /query engine|query_engine|could not locate|cached dependencies/i.test(
+          error.message,
+        )
+          ? 'possible'
+          : 'not_identified',
+    };
+  }
   console.error(
     '[mollad] Permintaan gagal',
     error instanceof Error ? error.name : 'UnknownError',
+    ...(databaseDiagnostic ? [databaseDiagnostic] : []),
   );
   return NextResponse.json(
     { error: 'Terjadi kendala. Silakan coba lagi.' },

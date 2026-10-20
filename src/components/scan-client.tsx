@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Text } from '@/components/language-provider';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -27,10 +28,14 @@ export function ScanClient({
   wallets,
   categories,
   provider,
+  done,
+  manual,
 }: {
   wallets: Option[];
   categories: Option[];
   provider: string;
+  done?: () => void;
+  manual?: () => void;
 }) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState('');
@@ -87,14 +92,18 @@ export function ScanClient({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">CATAT PENGELUARAN</span>
+          <span className="eyebrow">
+            <Text>{'CATAT PENGELUARAN'}</Text>
+          </span>
           <h1 className="page-title">
-            {result ? 'Periksa hasil scan' : 'Scan struk'}
+            <Text>{result ? 'Periksa hasil scan' : 'Scan struk'}</Text>
           </h1>
           <p className="text-sm text-muted">
-            {result
-              ? 'Cocokkan nominal, tanggal, kategori, dan dompet dengan foto sebelum menyimpan.'
-              : 'Unggah atau foto struk belanja untuk mengisi transaksi. Hasilnya bisa kamu koreksi.'}
+            <Text>
+              {result
+                ? 'Cocokkan nominal, tanggal, kategori, dan dompet dengan foto sebelum menyimpan.'
+                : 'Unggah atau foto struk belanja untuk mengisi transaksi. Hasilnya bisa kamu koreksi.'}
+            </Text>
           </p>
         </div>
         {result && (
@@ -106,7 +115,7 @@ export function ScanClient({
             }}
           >
             <ArrowLeft size={16} />
-            Scan struk lain
+            <Text>{'Scan struk lain'}</Text>
           </button>
         )}
       </div>
@@ -136,16 +145,16 @@ export function ScanClient({
               >
                 {result && i === 0 ? <Check size={13} /> : i + 1}
               </span>
-              {label}
+              <Text>{label}</Text>
             </li>
           ),
         )}
       </ol>
       {!wallets.length && (
         <p className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          Tambahkan dompet sebelum menyimpan hasil scan.{' '}
+          <Text>{'Tambahkan dompet sebelum menyimpan hasil scan.'}</Text>{' '}
           <Link className="underline" href="/dompet">
-            Buka dompet
+            <Text>{'Buka dompet'}</Text>
           </Link>
         </p>
       )}
@@ -166,10 +175,15 @@ export function ScanClient({
               <span className="mb-4 rounded-2xl bg-emerald-100 p-3 text-emerald-800 sm:p-5">
                 <ScanLine size={38} />
               </span>
-              <h2 className="text-lg font-extrabold">Pilih foto struk</h2>
+              <h2 className="text-lg font-extrabold">
+                <Text>{'Pilih foto struk'}</Text>
+              </h2>
               <p className="mt-3 max-w-xs text-xs leading-6 text-muted">
-                Pastikan seluruh struk terlihat, cahaya cukup, dan tulisan tidak
-                buram.
+                <Text>
+                  {
+                    'Pastikan seluruh struk terlihat, cahaya cukup, dan tulisan tidak buram.'
+                  }
+                </Text>
               </p>
             </div>
           )}
@@ -178,7 +192,7 @@ export function ScanClient({
               <div className="mt-5 grid grid-cols-2 gap-2 sm:gap-3">
                 <label className="scan-file-choice button button-secondary cursor-pointer px-2 sm:px-5">
                   <UploadCloud size={16} />
-                  Pilih foto
+                  <Text>{'Pilih foto'}</Text>
                   <input
                     aria-label="Unggah foto struk"
                     type="file"
@@ -190,7 +204,7 @@ export function ScanClient({
                 </label>
                 <label className="scan-file-choice button button-secondary cursor-pointer px-2 sm:px-5">
                   <Camera size={16} />
-                  Ambil foto
+                  <Text>{'Ambil foto'}</Text>
                   <input
                     aria-label="Ambil foto struk"
                     type="file"
@@ -203,12 +217,13 @@ export function ScanClient({
                 </label>
               </div>
               <p className="mt-3 text-center text-[10px] text-muted">
-                JPG, PNG, WebP · Maksimal 8 MB
+                <Text>{'JPG, PNG, WebP · Maksimal 8 MB'}</Text>
               </p>
               {file && (
                 <div className="mt-4 flex items-center justify-between gap-3 rounded-lg bg-canvas p-3 text-xs">
                   <span className="min-w-0 truncate" title={file.name}>
-                    {file.name} · {(file.size / 1024 / 1024).toFixed(1)} MB
+                    {file.name} · {(file.size / 1024 / 1024).toFixed(1)}
+                    <Text>{'MB'}</Text>
                   </span>
                   <button
                     type="button"
@@ -216,7 +231,7 @@ export function ScanClient({
                     className="min-h-11 shrink-0 px-2 font-bold text-muted underline"
                     onClick={() => setFile(null)}
                   >
-                    Hapus foto
+                    <Text>{'Hapus foto'}</Text>
                   </button>
                 </div>
               )}
@@ -227,16 +242,18 @@ export function ScanClient({
                   disabled={busy}
                 >
                   <ScanLine size={17} />
-                  {busy ? 'Membaca struk…' : 'Baca struk'}
+                  <Text>{busy ? 'Membaca struk…' : 'Baca struk'}</Text>
                 </button>
               )}
             </>
           )}
           <p className="mt-5 flex items-start gap-2 text-[11px] leading-5 text-muted">
             <ShieldCheck size={15} className="mt-0.5 shrink-0" />
-            {provider === 'vision'
-              ? 'Foto diproses sementara oleh layanan AI yang dikonfigurasi. mollad menyimpan data struk tanpa menyimpan gambarnya.'
-              : 'Foto diproses sementara. Setelah Simpan, hanya data struk yang tersimpan; gambar tidak disimpan oleh mollad.'}
+            <Text>
+              {provider === 'vision'
+                ? 'Foto diproses sementara oleh layanan AI yang dikonfigurasi. mollad menyimpan data struk tanpa menyimpan gambarnya.'
+                : 'Foto diproses sementara. Setelah Simpan, hanya data struk yang tersimpan; gambar tidak disimpan oleh mollad.'}
+            </Text>
           </p>
         </section>
         <section>
@@ -253,25 +270,36 @@ export function ScanClient({
               <div className="logo-breathe">
                 <Logo variant="mark" />
               </div>
-              <h2 className="mt-6 font-bold">Sedang membaca struk…</h2>
+              <h2 className="mt-6 font-bold">
+                <Text>{'Sedang membaca struk…'}</Text>
+              </h2>
               <p className="mt-3 max-w-xs text-xs leading-6 text-muted">
-                Proses dapat memerlukan sekitar satu menit. Biarkan halaman ini
-                terbuka. Setelah selesai, periksa hasilnya sebelum menyimpan.
+                <Text>
+                  {
+                    'Proses dapat memerlukan sekitar satu menit. Biarkan halaman ini terbuka. Setelah selesai, periksa hasilnya sebelum menyimpan.'
+                  }
+                </Text>
               </p>
             </div>
           ) : result ? (
             <div className="card p-6 sm:p-8">
               <h2 className="mb-2 text-lg font-extrabold">
-                {result.manual ? 'Lengkapi secara manual' : 'Hasil pembacaan'}
+                <Text>
+                  {result.manual ? 'Lengkapi secara manual' : 'Hasil pembacaan'}
+                </Text>
               </h2>
               <p className="mb-6 text-xs text-muted">
-                Keyakinan pembacaan: {Math.round(result.data.confidence * 100)}
-                %. Tetap periksa setiap angka.
+                <Text>{'Keyakinan pembacaan:'}</Text>
+                {Math.round(result.data.confidence * 100)}
+                <Text>{'%. Tetap periksa setiap angka.'}</Text>
               </p>
               {result.manual && (
                 <p className="mb-5 rounded-xl bg-amber-50 p-4 text-xs leading-5 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
-                  Sebagian tulisan belum terbaca dengan baik. Isi data di bawah;
-                  foto tetap terlihat selama review dan tidak disimpan.
+                  <Text>
+                    {
+                      'Sebagian tulisan belum terbaca dengan baik. Isi data di bawah; foto tetap terlihat selama review dan tidak disimpan.'
+                    }
+                  </Text>
                 </p>
               )}
               {result.duplicate && (
@@ -280,11 +308,15 @@ export function ScanClient({
                   className="mb-5 flex gap-2 rounded-xl bg-amber-50 p-4 text-xs leading-5 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
                 >
                   <TriangleAlert size={18} className="shrink-0" />
-                  Ada transaksi dengan merchant, tanggal, dan total yang sama.
-                  Periksa agar tidak tercatat dua kali.
+                  <Text>
+                    {
+                      'Ada transaksi dengan merchant, tanggal, dan total yang sama. Periksa agar tidak tercatat dua kali.'
+                    }
+                  </Text>
                 </p>
               )}
               <TransactionForm
+                done={done}
                 wallets={wallets}
                 categories={categories}
                 lowConfidence={result.lowConfidence}
@@ -305,7 +337,8 @@ export function ScanClient({
               {!!result.data.items.length && (
                 <details className="mt-6 border-t border-line pt-5 text-xs">
                   <summary className="cursor-pointer font-bold">
-                    Detail barang ({result.data.items.length})
+                    <Text>{'Detail barang ('}</Text>
+                    {result.data.items.length})
                   </summary>
                   <ul className="mt-3 space-y-2 text-muted">
                     {result.data.items.map((item, i) => (
@@ -318,9 +351,10 @@ export function ScanClient({
                     ))}
                   </ul>
                   <p className="mt-4 text-muted">
-                    Pajak {formatRupiah(result.data.pajak)} · Diskon{' '}
-                    {formatRupiah(result.data.diskon)} ·{' '}
-                    {result.data.metode_bayar || 'Metode belum terbaca'}
+                    <Text>{'Pajak'}</Text>
+                    {formatRupiah(result.data.pajak)}
+                    <Text>{'· Diskon'}</Text> {formatRupiah(result.data.diskon)}{' '}
+                    · {result.data.metode_bayar || 'Metode belum terbaca'}
                   </p>
                 </details>
               )}
@@ -328,10 +362,14 @@ export function ScanClient({
           ) : (
             <div className="card p-6 sm:p-8">
               <h2 className="text-lg font-bold">
-                Agar struk terbaca dengan baik
+                <Text>{'Agar struk terbaca dengan baik'}</Text>
               </h2>
               <p className="mt-2 text-sm text-muted">
-                Gunakan foto yang jelas dan pastikan nominal total terlihat.
+                <Text>
+                  {
+                    'Gunakan foto yang jelas dan pastikan nominal total terlihat.'
+                  }
+                </Text>
               </p>
               <div className="mt-8 space-y-6">
                 {[
@@ -356,9 +394,11 @@ export function ScanClient({
                       {n}
                     </span>
                     <div>
-                      <h3 className="text-sm font-bold">{title}</h3>
+                      <h3 className="text-sm font-bold">
+                        <Text>{title}</Text>
+                      </h3>
                       <p className="mt-2 max-w-sm text-xs leading-6 text-muted">
-                        {body}
+                        <Text>{body}</Text>
                       </p>
                     </div>
                   </div>
@@ -366,14 +406,23 @@ export function ScanClient({
               </div>
               <div className="mt-7 border-t border-line pt-5">
                 <p className="mb-3 text-sm text-muted">
-                  Tidak punya struk atau ingin mengetik sendiri?
+                  <Text>
+                    {'Tidak punya struk atau ingin mengetik sendiri?'}
+                  </Text>
                 </p>
-                <Link href="/transaksi" className="button button-secondary">
-                  Catat transaksi manual
-                </Link>
+                <button
+                  type="button"
+                  onClick={manual}
+                  className="button button-secondary"
+                >
+                  <Text>{'Catat transaksi manual'}</Text>
+                </button>
                 <p className="mt-4 text-xs leading-6 text-muted">
-                  Foto hanya tersedia selama halaman ini terbuka. Jika halaman
-                  dimuat ulang, unggah kembali fotonya.
+                  <Text>
+                    {
+                      'Foto hanya tersedia selama halaman ini terbuka. Jika halaman dimuat ulang, unggah kembali fotonya.'
+                    }
+                  </Text>
                 </p>
               </div>
             </div>

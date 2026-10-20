@@ -1,4 +1,6 @@
 import { AuthForm } from '@/components/auth-form';
-export default function Page() {
+import { requireGuest } from '@/lib/auth';
+export default async function Page() {
+  await requireGuest();
   return <AuthForm />;
 }

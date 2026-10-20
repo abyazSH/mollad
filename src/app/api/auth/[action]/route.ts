@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { hash, compare } from 'bcryptjs';
 import { z } from 'zod';
 import { db } from '@/lib/db';
-import { createSession } from '@/lib/auth';
+import { createSession, currentUser } from '@/lib/auth';
 import {
   apiError,
   HttpError,
@@ -39,6 +39,12 @@ export async function POST(
     }
     if (action !== 'login' && action !== 'register')
       throw new HttpError(404, 'Halaman tidak ditemukan.');
+    if (await currentUser())
+      throw new HttpError(
+        409,
+        'Kamu sudah masuk. Buka dashboard untuk melanjutkan.',
+        'ALREADY_AUTHENTICATED',
+      );
     const data = credentials.parse(await jsonInput(request));
     // A shared bucket also limits registration with rotating email addresses on a single installation.
     await rateLimit('auth:global', 100);

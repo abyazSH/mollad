@@ -85,3 +85,23 @@
 - Simbol m dan wordmark SVG, favicon/ikon PNG/maskable, serta OG dibuat ulang dan diperiksa visual.
 - Teks tombol memakai #173F38 pada tosca (kontras 4,60:1). Sidebar mint, informasi positif blush, dan grafik tosca/pink dengan garis pembanding putus-putus. Warna kategori pengguna tidak diubah.
 - Lint, TypeScript, 58 unit test, serta pemeriksaan browser komponen desktop/gelap/HP lulus. Tidak ada perubahan skema atau data Neon pada rebranding.
+
+## Halaman tamu dan pembatasan akses
+
+- `/` menjadi halaman pengenalan mollad khusus tamu; dashboard berpindah ke `/dashboard`. `/login`, `/register`, dan alias `/daftar` memeriksa sesi di server dan mengalihkan pengguna yang sudah login ke dashboard.
+- Halaman aplikasi mengalihkan tamu ke `/`. Setelah login/daftar pengguna masuk ke dashboard; setelah logout kembali ke pengenalan. API data tetap mengembalikan 401 tanpa sesi dan memfilter pemilik data.
+- API login/register menolak sesi aktif dengan 409 ALREADY_AUTHENTICATED sebelum validasi/penulisan akun baru. Cookie palsu atau akun yang dihapus tidak membuka halaman pribadi.
+- Halaman pengenalan responsif menjelaskan dompet, transaksi, anggaran, dan alur scan serta menyediakan tombol masuk/daftar.
+- Lint, TypeScript, format, 78 unit test, dan build produksi lulus. Lima tes browser akses tamu/halaman publik HP lulus. Pengalihan sesi valid, penolakan API login/register, dan logout diperiksa melalui sesi browser sementara tanpa membuat akun/transaksi/anggaran.
+- Workflow GitHub ditambah pengujian akses publik tanpa kredensial database produksi. Tidak ada migrasi atau perubahan data pengguna untuk perubahan rute ini.
+
+### Penyederhanaan navigasi dan Profil
+
+- Dompet dan kategori tersedia bersama di /dompet. URL /kategori tetap mengarah ke bagian kategori untuk kompatibilitas tautan lama.
+- Tidak ada header atas pada ruang pribadi. Lima menu desktop/HP: Ringkasan, Transaksi, Dompet, Anggaran, Profil.
+- Scan struk dipindah ke dialog Catat transaksi; tombol Manual/Scan struk, preview, review wajib, fallback manual, dan pelepasan blob foto tetap berjalan. /scan dialihkan ke dialog transaksi.
+- Profil berisi nama/email akun, logout, bahasa Indonesia/English, mode terang/gelap/sistem, serta ekspor CSV dengan filter dan pesan kegagalan. Bahasa/tema disimpan pada browser perangkat ini.
+- Label utama ruang pribadi diterjemahkan; data pengguna, tanggal/Rupiah, pesan server, dan halaman publik tetap dalam bahasa asal. Tidak ada migrasi atau perubahan data Neon.
+- Verifikasi: lint dan TypeScript bersih, 78 unit test lulus, delapan skenario browser lulus (skenario Profil diulang setelah nama aksesibel dropdown diperbaiki). Pengujian memakai sesi sementara akun yang sudah ada; upload dan penyimpanan transaksi dimock sehingga tidak membuat data keuangan.
+- Preview HP halaman Dompet, Profil, serta dialog Scan diperiksa visual.
+- Build produksi berhasil: /profil tersedia; /kategori dan /scan menjadi pengalihan terautentikasi. Demo lokal dijalankan kembali pada port 3108.

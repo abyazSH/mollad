@@ -35,6 +35,12 @@ export default async function Page({
       }))}
       wallets={wallets}
       categories={categories}
+      provider={
+        process.env.OCR_PROVIDER === 'vision' && process.env.VISION_API_KEY
+          ? 'vision'
+          : 'tesseract'
+      }
+      initialScan={raw.catat === 'scan'}
       filters={Object.fromEntries(
         Object.entries(parsed.data).map(([k, v]) => [k, String(v)]),
       )}

@@ -1,10 +1,12 @@
 'use client';
 import { useState } from 'react';
+import { Text } from '@/components/language-provider';
 import { Plus, Pencil, Trash2, Target, TriangleAlert } from 'lucide-react';
 import { Modal } from './modal';
 import { mutate } from '@/lib/client';
 import { formatRupiah } from '@/lib/money';
 import { percentageBudget } from '@/lib/budget-calculation';
+import { categoryColorStyle } from '@/lib/category-colors';
 type Budget = {
   id: string;
   categoryId: string;
@@ -90,36 +92,50 @@ export function BudgetManager({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">RENCANA BULANAN</span>
-          <h1 className="page-title">Anggaran</h1>
+          <span className="eyebrow">
+            <Text>{'RENCANA BULANAN'}</Text>
+          </span>
+          <h1 className="page-title">
+            <Text>{'Anggaran'}</Text>
+          </h1>
           <p className="text-sm text-muted">
-            Tentukan batas pengeluaran dalam Rupiah atau persentase penghasilan.
+            <Text>
+              {
+                'Tentukan batas pengeluaran dalam Rupiah atau persentase penghasilan.'
+              }
+            </Text>
           </p>
         </div>
         <button className="button" onClick={() => openBudget({})}>
           <Plus size={16} />
-          Buat anggaran
+          <Text>{'Buat anggaran'}</Text>
         </button>
       </div>
       <form action="/anggaran" className="mb-6 flex flex-wrap items-end gap-3">
         <label>
-          Bulan
+          <Text>{'Bulan'}</Text>
           <input type="month" name="month" defaultValue={month} required />
         </label>
-        <button className="button button-secondary">Tampilkan</button>
+        <button className="button button-secondary">
+          <Text>{'Tampilkan'}</Text>
+        </button>
       </form>
       <div className="mb-7 flex flex-wrap gap-8 rounded-2xl bg-brand-mint p-6 text-ink">
         <div>
-          <p className="text-xs text-muted">Penghasilan bulan terpilih</p>
+          <p className="text-xs text-muted">
+            <Text>{'Penghasilan bulan terpilih'}</Text>
+          </p>
           <p className="mt-2 text-2xl font-extrabold">{formatRupiah(income)}</p>
         </div>
         <div>
-          <p className="text-xs text-muted">Total rencana</p>
+          <p className="text-xs text-muted">
+            <Text>{'Total rencana'}</Text>
+          </p>
           <p className="mt-2 text-2xl font-extrabold">{formatRupiah(total)}</p>
         </div>
         <div>
           <p className="text-xs text-muted">
-            Terpakai pada kategori beranggaran
+            <Text>{'Terpakai pada kategori beranggaran'}</Text>
           </p>
           <p className="mt-2 text-2xl font-extrabold text-ink">
             {formatRupiah(budgets.reduce((s, b) => s + b.spent, 0))}
@@ -127,20 +143,24 @@ export function BudgetManager({
         </div>
       </div>
       <p className="mb-5 text-sm text-muted">
-        Dasar persentase adalah seluruh pemasukan pada bulan {month}, tanpa
-        saldo awal atau transfer. Nominal anggaran persentase otomatis mengikuti
-        perubahan pemasukan.
+        <Text>{'Dasar persentase adalah seluruh pemasukan pada bulan'}</Text>
+        {month}
+        <Text>
+          {
+            ', tanpa saldo awal atau transfer. Nominal anggaran persentase otomatis mengikuti perubahan pemasukan.'
+          }
+        </Text>
       </p>
       {(allocationPercent > 100 || (income > 0 && total > income)) && (
         <p
           role="status"
           className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
         >
-          Total rencana melebihi penghasilan bulan ini
+          <Text>{'Total rencana melebihi penghasilan bulan ini'}</Text>
           {allocationPercent > 100
             ? `; alokasi persentase berjumlah ${allocationPercent}%`
             : ''}
-          . Periksa kembali pembagian anggaranmu.
+          <Text>{'. Periksa kembali pembagian anggaranmu.'}</Text>
         </p>
       )}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -148,8 +168,8 @@ export function BudgetManager({
           <article key={b.id} className="card p-6">
             <div className="flex items-center gap-3">
               <span
-                className="h-3 w-3 rounded-full"
-                style={{ background: b.category.color }}
+                className="category-color h-3 w-3 rounded-full"
+                style={categoryColorStyle(b.category.color)}
               />
               <h2 className="flex-1 text-sm font-bold">{b.category.name}</h2>
               <button
@@ -174,17 +194,22 @@ export function BudgetManager({
               {formatRupiah(b.spent)}
             </p>
             <p className="mt-1 text-xs text-muted">
-              dari {formatRupiah(b.amount)}
+              <Text>{'dari'}</Text>
+              {formatRupiah(b.amount)}
             </p>
             {b.incomePercent != null && (
               <p className="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                {b.incomePercent}% dari penghasilan · Otomatis
+                {b.incomePercent}
+                <Text>{'% dari penghasilan · Otomatis'}</Text>
               </p>
             )}
             {b.incomePercent != null && income === 0 && (
               <p className="mt-2 text-xs text-muted">
-                Belum ada pemasukan. Alokasi akan dihitung setelah pemasukan
-                dicatat.
+                <Text>
+                  {
+                    'Belum ada pemasukan. Alokasi akan dihitung setelah pemasukan dicatat.'
+                  }
+                </Text>
               </p>
             )}
             <div
@@ -234,9 +259,11 @@ export function BudgetManager({
                 }
               >
                 <TriangleAlert size={15} className="shrink-0" />
-                {b.status === 'over'
-                  ? 'Sudah melewati anggaran. Saatnya atur ulang rencana.'
-                  : 'Lebih dari 80% terpakai. Perhatikan pengeluaran berikutnya.'}
+                <Text>
+                  {b.status === 'over'
+                    ? 'Sudah melewati anggaran. Saatnya atur ulang rencana.'
+                    : 'Lebih dari 80% terpakai. Perhatikan pengeluaran berikutnya.'}
+                </Text>
               </p>
             )}
           </article>
@@ -246,9 +273,11 @@ export function BudgetManager({
         <div className="card empty">
           <Target size={32} />
           <h2 className="font-bold text-ink">
-            Mulai dengan satu rencana kecil.
+            <Text>{'Mulai dengan satu rencana kecil.'}</Text>
           </h2>
-          <p>Atur batas pengeluaran kategori untuk bulan ini.</p>
+          <p>
+            <Text>{'Atur batas pengeluaran kategori untuk bulan ini.'}</Text>
+          </p>
         </div>
       )}
       {edit && (
@@ -258,13 +287,15 @@ export function BudgetManager({
         >
           <form method="post" onSubmit={submit} className="space-y-5">
             <label>
-              Kategori
+              <Text>{'Kategori'}</Text>
               <select
                 name="categoryId"
                 required
                 defaultValue={edit.categoryId || ''}
               >
-                <option value="">Pilih kategori</option>
+                <option value="">
+                  <Text>{'Pilih kategori'}</Text>
+                </option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -273,18 +304,22 @@ export function BudgetManager({
               </select>
             </label>
             <label>
-              Cara menentukan anggaran
+              <Text>{'Cara menentukan anggaran'}</Text>
               <select
                 value={mode}
                 onChange={(event) => setMode(event.target.value as typeof mode)}
               >
-                <option value="fixed">Nominal tetap (Rp)</option>
-                <option value="percentage">Persentase penghasilan (%)</option>
+                <option value="fixed">
+                  <Text>{'Nominal tetap (Rp)'}</Text>
+                </option>
+                <option value="percentage">
+                  <Text>{'Persentase penghasilan (%)'}</Text>
+                </option>
               </select>
             </label>
             {mode === 'fixed' ? (
               <label>
-                Anggaran (Rp)
+                <Text>{'Anggaran (Rp)'}</Text>
                 <input
                   name="amount"
                   type="number"
@@ -298,7 +333,7 @@ export function BudgetManager({
             ) : (
               <>
                 <label>
-                  Persentase penghasilan (%)
+                  <Text>{'Persentase penghasilan (%)'}</Text>
                   <input
                     name="incomePercent"
                     type="number"
@@ -325,16 +360,23 @@ export function BudgetManager({
                     {formatRupiah(preview)}
                   </p>
                   <p className="mt-2 text-xs text-muted">
-                    {income === 0
-                      ? 'Belum ada pemasukan bulan ini. Persentase tetap dapat disimpan; nominal akan terisi setelah pemasukan dicatat.'
-                      : 'Dibulatkan ke Rupiah terdekat dan dihitung ulang saat pemasukan berubah.'}
+                    <Text>
+                      {income === 0
+                        ? 'Belum ada pemasukan bulan ini. Persentase tetap dapat disimpan; nominal akan terisi setelah pemasukan dicatat.'
+                        : 'Dibulatkan ke Rupiah terdekat dan dihitung ulang saat pemasukan berubah.'}
+                    </Text>
                   </p>
                 </div>
               </>
             )}
             <p className="text-xs text-muted">
-              Bulan {month}. Menyimpan kategori yang sama akan memperbarui
-              anggaran bulan tersebut.
+              <Text>{'Bulan'}</Text>
+              {month}
+              <Text>
+                {
+                  '. Menyimpan kategori yang sama akan memperbarui anggaran bulan tersebut.'
+                }
+              </Text>
             </p>
             {error && (
               <p className="error-box" role="alert">
@@ -345,7 +387,7 @@ export function BudgetManager({
               className="button w-full"
               disabled={busy || (mode === 'percentage' && !validPercent)}
             >
-              Simpan anggaran
+              <Text>{'Simpan anggaran'}</Text>
             </button>
           </form>
         </Modal>
@@ -353,8 +395,11 @@ export function BudgetManager({
       {removeId && (
         <Modal title="Hapus anggaran?" close={() => setRemoveId(null)}>
           <p className="mb-5 text-sm text-muted">
-            Rencana anggaran ini akan dihapus. Catatan transaksi tetap
-            tersimpan.
+            <Text>
+              {
+                'Rencana anggaran ini akan dihapus. Catatan transaksi tetap tersimpan.'
+              }
+            </Text>
           </p>
           {error && (
             <p className="error-box mb-4" role="alert">
@@ -362,7 +407,7 @@ export function BudgetManager({
             </p>
           )}
           <button className="button" disabled={busy} onClick={remove}>
-            Hapus anggaran
+            <Text>{'Hapus anggaran'}</Text>
           </button>
         </Modal>
       )}

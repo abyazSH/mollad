@@ -2,26 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 :root {
+  color-scheme: light;
   --canvas: #fcfefd;
-  --surface: #fff;
+  --surface: #ffffff;
   --ink: #385a55;
   --muted: #57756f;
   --line: #d4e7e1;
   --accent: #2c8c7b;
   --primary: #46b4a0;
-  --pink: #ffa6c1;
+  --primary-hover: #2c8c7b;
+  --accent-detail: #8ed3c5;
+  --accent-solid: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --active-background: linear-gradient(110deg, #f2fbf8, #d9f2ea);
+  --active-ink: #385a55;
+  --active-color: #216c5d;
+  --accent-soft: #e7f7f4;
+  --accent-line: #c7eae3;
   --brand-mint: #e7f7f4;
-  --brand-blush: #fff0f2;
+  --brand-blush: #e7f7f4;
+  --balance-background: linear-gradient(120deg, #e7f7f4, #cceee5);
+  --balance-ink: #385a55;
+  --balance-divider: #385a5526;
+  --logo-dot: #bfe9db;
+  --chart-income: #087f5b;
+  --chart-expense: #c05a12;
+  --tone-50: 242 251 248;
+  --tone-100: 231 247 244;
+  --tone-200: 199 234 227;
+  --tone-300: 142 211 197;
+  --tone-400: 70 180 160;
+  --tone-500: 70 180 160;
+  --tone-600: 44 140 123;
+  --tone-700: 56 90 85;
+  --tone-800: 56 90 85;
+  --tone-900: 40 75 68;
+  --tone-950: 25 57 50;
 }
 .dark {
-  --canvas: #102d28;
-  --surface: #193932;
-  --ink: #e7f7f4;
-  --muted: #b7d4cd;
-  --line: #36594f;
-  --accent: #8ed3c5;
-  --brand-mint: #21433d;
-  --brand-blush: #4d333d;
+  color-scheme: dark;
+  --canvas: #09090b;
+  --surface: #151316;
+  --ink: #fff5fa;
+  --muted: #c5b5be;
+  --line: #332831;
+  --accent: #ffb3d1;
+  --primary: #c44b7c;
+  --primary-hover: #ad3c6a;
+  --accent-detail: #ffa6c1;
+  --accent-solid: var(--primary);
+  --accent-hover: var(--primary-hover);
+  --active-background: linear-gradient(110deg, #2a1923, #3b2130);
+  --active-ink: #ffdde9;
+  --active-color: #ff91b9;
+  --accent-soft: #2a1923;
+  --accent-line: #694052;
+  --brand-mint: #24171f;
+  --brand-blush: #171216;
+  --balance-background: linear-gradient(120deg, #2e1826, #49263a);
+  --balance-ink: #ffedf5;
+  --balance-divider: #ffb3d133;
+  --logo-dot: #ffb3d1;
+  --chart-income: #67e8f9;
+  --chart-expense: #ff8fb8;
+  --tone-50: 26 18 23;
+  --tone-100: 50 31 42;
+  --tone-200: 255 222 235;
+  --tone-300: 255 194 220;
+  --tone-400: 235 125 170;
+  --tone-500: 213 95 144;
+  --tone-600: 173 60 106;
+  --tone-700: 255 222 237;
+  --tone-800: 255 222 237;
+  --tone-900: 61 33 49;
+  --tone-950: 26 18 23;
 }
 * {
   box-sizing: border-box;
@@ -39,8 +93,8 @@ html {
   scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom));
 }
 ::selection {
-  background: #ffa6c1;
-  color: #173f38;
+  background: var(--accent-soft);
+  color: var(--active-ink);
 }
 @layer base {
   button,
@@ -104,22 +158,29 @@ html {
     @apply rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200;
   }
   .success-box {
-    @apply rounded-xl border border-brand-pink/40 bg-brand-blush p-3 text-sm text-ink;
+    @apply rounded-xl border border-brand-primary bg-brand-primary p-3 text-sm text-white;
   }
   .avatar {
-    @apply flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800;
+    @apply flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white;
+    background-color: var(--accent-solid);
   }
   .sidebar {
-    @apply fixed inset-y-0 left-0 z-30 hidden w-[232px] flex-col overflow-y-auto border-r border-line bg-brand-mint px-5 py-8 text-ink lg:flex;
+    @apply fixed bottom-4 left-4 top-4 z-30 hidden w-[208px] flex-col overflow-y-auto rounded-[28px] border border-line bg-brand-blush px-4 py-7 text-ink lg:flex;
+    box-shadow: 0 8px 32px #00000005;
   }
   .nav-link {
-    @apply mb-1 flex items-center gap-3 rounded-xl px-4 py-3.5 text-[13px] font-medium text-ink hover:bg-surface;
+    @apply mb-2 flex min-h-12 items-center gap-3 rounded-full px-4 py-3 text-[13px] font-medium text-ink hover:bg-surface;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
   }
   .nav-link.active {
-    @apply bg-brand-primary font-bold text-brand-onPrimary;
+    @apply font-bold;
+    background: var(--active-background);
+    color: var(--active-color);
   }
   .sidebar-note {
-    @apply mb-10 mt-12 rounded-2xl border border-brand-pink/40 bg-brand-blush p-5 text-sm font-semibold;
+    @apply mb-10 mt-12 rounded-2xl border border-brand-primary bg-brand-primary p-5 text-sm font-semibold text-white;
   }
   .main-wrap {
     @apply lg:ml-[232px];
@@ -131,13 +192,30 @@ html {
     @apply mx-auto max-w-[1480px] px-4 py-6 pb-[calc(6rem+env(safe-area-inset-bottom))] sm:px-10 sm:py-10 lg:pb-12;
   }
   .mobile-nav {
-    @apply fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-line bg-surface px-1 pb-[env(safe-area-inset-bottom)] text-muted lg:hidden;
+    @apply fixed inset-x-3 z-30 mx-auto flex max-w-[520px] items-center gap-1 rounded-[28px] border border-line bg-surface p-1.5 text-muted lg:hidden;
+    bottom: calc(6px + env(safe-area-inset-bottom));
+    box-shadow: 0 8px 32px #00000012;
   }
   .mobile-nav a {
-    @apply flex min-h-16 min-w-0 flex-1 flex-col items-center justify-center gap-1 px-0.5 text-[10px] font-semibold;
+    @apply flex min-h-[60px] min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-[22px] px-0.5 text-[10px] font-semibold;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+  .mobile-nav a span {
+    @apply max-w-full truncate;
+  }
+  .mobile-nav a:hover {
+    background: var(--primary-hover);
+    color: #fff;
   }
   .mobile-nav a[aria-current='page'] {
-    @apply border-t-2 border-brand-primary bg-brand-mint font-bold text-ink;
+    @apply font-bold text-white;
+    background: var(--primary);
+  }
+  .nav-link.active svg,
+  .mobile-nav a[aria-current='page'] svg {
+    stroke-width: 2.25;
   }
   .content :is(p, span).text-\[10px\],
   .content :is(p, span).text-\[11px\] {
@@ -168,6 +246,46 @@ html {
   .field-grid {
     @apply grid gap-5 sm:grid-cols-2;
   }
+}
+.accent-panel {
+  background-color: var(--primary);
+  color: #fff;
+}
+.balance-hero {
+  background: var(--balance-background);
+  color: var(--balance-ink);
+}
+.balance-hero * {
+  color: var(--balance-ink);
+}
+.balance-hero .hero-divider {
+  border-color: var(--balance-divider);
+}
+.accent-card {
+  border-top: 2px solid var(--accent-line);
+}
+.accent-soft-panel {
+  background-color: var(--accent-soft);
+  color: var(--active-ink);
+}
+.button-accent {
+  background-color: var(--accent-solid);
+  color: #fff;
+}
+.button-accent:hover {
+  background-color: var(--accent-hover);
+}
+.accent-panel *,
+.success-box *,
+.sidebar-note * {
+  color: #fff;
+}
+.category-color {
+  --category-display: var(--category-light);
+  background-color: var(--category-display);
+}
+.dark .category-color {
+  --category-display: var(--category-dark);
 }
 @media (max-width: 639px) {
   input,

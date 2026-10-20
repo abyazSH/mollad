@@ -1,3 +1,4 @@
+import { testOrigin } from './test-origin';
 import { test, expect } from '@playwright/test';
 import sharp from 'sharp';
 import { readdir } from 'node:fs/promises';
@@ -6,7 +7,7 @@ test('foto nyata → OCR → review → simpan, duplikat, dan fallback manual', 
   browser,
 }) => {
   test.setTimeout(240000);
-  const headers = { origin: 'http://localhost:3000' };
+  const headers = { origin: testOrigin };
   const beforeFiles = await readdir('uploads');
   expect(
     (
@@ -51,8 +52,13 @@ test('foto nyata → OCR → review → simpan, duplikat, dan fallback manual', 
     '</svg>';
   const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
   async function upload() {
-    await page.goto('/scan');
+    await page.goto('/transaksi');
     await expect(page.locator('#main')).toHaveAttribute('aria-busy', 'false');
+    await page
+      .getByRole('button', { name: 'Catat transaksi', exact: true })
+      .first()
+      .click();
+    await page.getByRole('button', { name: 'Scan struk', exact: true }).click();
     await page
       .getByLabel('Unggah foto struk', { exact: true })
       .setInputFiles({ name: 'struk.png', mimeType: 'image/png', buffer });
@@ -95,14 +101,12 @@ test('foto nyata → OCR → review → simpan, duplikat, dan fallback manual', 
   const anonymous = await browser.newContext();
   expect(
     (
-      await anonymous.request.get(
-        'http://localhost:3000/api/receipts/' + first.id,
-      )
+      await anonymous.request.get(testOrigin + '/api/receipts/' + first.id)
     ).status(),
   ).toBe(401);
   expect(
     (
-      await anonymous.request.post('http://localhost:3000/api/auth/register', {
+      await anonymous.request.post(testOrigin + '/api/auth/register', {
         headers,
         data: {
           name: 'Akun Lain',
@@ -114,9 +118,7 @@ test('foto nyata → OCR → review → simpan, duplikat, dan fallback manual', 
   ).toBe(200);
   expect(
     (
-      await anonymous.request.get(
-        'http://localhost:3000/api/receipts/' + first.id,
-      )
+      await anonymous.request.get(testOrigin + '/api/receipts/' + first.id)
     ).status(),
   ).toBe(404);
   await anonymous.close();

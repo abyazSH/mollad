@@ -1,9 +1,11 @@
 'use client';
 import { useState } from 'react';
+import { Text } from '@/components/language-provider';
 import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, Shapes } from 'lucide-react';
 import { Modal } from './modal';
 import { mutate } from '@/lib/client';
+import { categoryColorStyle, categoryPalette } from '@/lib/category-colors';
 type Item = { id: string; name: string; color: string };
 export function CategoryManager({ categories }: { categories: Item[] }) {
   const router = useRouter();
@@ -11,6 +13,7 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
   const [removing, setRemoving] = useState<Item | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const preview = categoryPalette(edit?.color || '#46B4A0');
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -46,10 +49,14 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">RAPIKAN SETIAP CATATAN</span>
-          <h1 className="page-title">Kategori.</h1>
+          <span className="eyebrow">
+            <Text>{'RAPIKAN SETIAP CATATAN'}</Text>
+          </span>
+          <h2 className="page-title">
+            <Text>{'Kategori.'}</Text>
+          </h2>
           <p className="text-sm text-muted">
-            Kelompok kecil untuk gambaran yang lebih jelas.
+            <Text>{'Kelompok kecil untuk gambaran yang lebih jelas.'}</Text>
           </p>
         </div>
         <button
@@ -60,15 +67,15 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
           }}
         >
           <Plus size={16} />
-          Tambah kategori
+          <Text>{'Tambah kategori'}</Text>
         </button>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {categories.map((c) => (
           <article className="card flex items-center gap-4 p-5" key={c.id}>
             <span
-              className="h-3 w-3 rounded-full"
-              style={{ background: c.color }}
+              className="category-color h-3 w-3 rounded-full"
+              style={categoryColorStyle(c.color)}
             />
             <h2 className="flex-1 text-sm font-bold">{c.name}</h2>
             <button
@@ -97,7 +104,9 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
       {!categories.length && (
         <div className="card empty">
           <Shapes />
-          <p>Tambahkan kategori untuk mulai mencatat transaksi.</p>
+          <p>
+            <Text>{'Tambahkan kategori untuk mulai mencatat transaksi.'}</Text>
+          </p>
         </div>
       )}
       {edit && (
@@ -107,7 +116,7 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
         >
           <form method="post" onSubmit={submit} className="space-y-5">
             <label>
-              Nama kategori
+              <Text>{'Nama kategori'}</Text>
               <input
                 name="name"
                 required
@@ -116,21 +125,52 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
               />
             </label>
             <label>
-              Warna
+              <Text>{'Warna dasar'}</Text>
               <input
                 name="color"
                 type="color"
                 className="h-12"
-                defaultValue={edit.color}
+                value={edit.color || '#46B4A0'}
+                onChange={(event) =>
+                  setEdit({ ...edit, color: event.target.value })
+                }
               />
             </label>
+            <div>
+              <p className="mb-2 text-xs font-semibold">
+                <Text>{'Pratinjau warna kategori'}</Text>
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-center gap-2 rounded-xl border border-line bg-white p-3 text-xs text-[#385A55]">
+                  <span
+                    className="h-4 w-4 rounded-full"
+                    style={{ backgroundColor: preview.light }}
+                  />
+                  <Text>{'Mode terang'}</Text>
+                </div>
+                <div className="flex items-center gap-2 rounded-xl bg-[#151316] p-3 text-xs text-[#FFF5FA]">
+                  <span
+                    className="h-4 w-4 rounded-full"
+                    style={{ backgroundColor: preview.dark }}
+                  />
+                  <Text>{'Mode gelap'}</Text>
+                </div>
+              </div>
+              <p className="mt-2 text-xs text-muted">
+                <Text>
+                  {
+                    'Pilih satu warna dasar. mollad menyesuaikan kecerahan secara otomatis agar penanda kategori tetap terlihat pada kedua mode.'
+                  }
+                </Text>
+              </p>
+            </div>
             {error && (
               <p className="error-box" role="alert">
                 {error}
               </p>
             )}
             <button className="button w-full" disabled={busy}>
-              Simpan kategori
+              <Text>{'Simpan kategori'}</Text>
             </button>
           </form>
         </Modal>
@@ -138,8 +178,13 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
       {removing && (
         <Modal title="Hapus kategori?" close={() => setRemoving(null)}>
           <p className="mb-5 text-sm text-muted">
-            Hapus {removing.name}? Kategori yang digunakan transaksi perlu
-            diganti dahulu. Anggaran kategori ini juga akan dihapus.
+            <Text>{'Hapus'}</Text>
+            {removing.name}
+            <Text>
+              {
+                '? Kategori yang digunakan transaksi perlu diganti dahulu. Anggaran kategori ini juga akan dihapus.'
+              }
+            </Text>
           </p>
           {error && (
             <p className="error-box mb-4" role="alert">
@@ -147,7 +192,7 @@ export function CategoryManager({ categories }: { categories: Item[] }) {
             </p>
           )}
           <button className="button" onClick={remove} disabled={busy}>
-            Hapus kategori
+            <Text>{'Hapus kategori'}</Text>
           </button>
         </Modal>
       )}

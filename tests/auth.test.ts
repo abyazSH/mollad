@@ -11,7 +11,17 @@ vi.mock('next/headers', () => ({
   }),
 }));
 vi.mock('@/lib/db', () => ({ db: { user: { findUnique: mocks.findUnique } } }));
-import { createSession, currentUser } from '@/lib/auth';
+vi.mock('next/navigation', () => ({
+  redirect: (path: string) => {
+    throw new Error('REDIRECT:' + path);
+  },
+}));
+import {
+  createSession,
+  currentUser,
+  requireUser,
+  requireGuest,
+} from '@/lib/auth';
 import { sameOrigin } from '@/lib/http';
 describe('Autentikasi dan batas origin', () => {
   beforeEach(() => {
@@ -65,5 +75,27 @@ describe('Autentikasi dan batas origin', () => {
         }),
       ),
     ).not.toThrow();
+  });
+  it('mengarahkan tamu dari halaman aplikasi ke halaman pengenalan', async () => {
+    await expect(requireUser()).rejects.toThrow('REDIRECT:/');
+    expect(mocks.findUnique).not.toHaveBeenCalled();
+    await expect(requireGuest()).resolves.toBeUndefined();
+  });
+  it('mengarahkan pemilik sesi valid dari halaman tamu ke dashboard', async () => {
+    await createSession('owner');
+    mocks.token = mocks.set.mock.calls[0][1];
+    mocks.findUnique.mockResolvedValue({ id: 'owner', name: 'Owner' });
+    await expect(requireGuest()).rejects.toThrow('REDIRECT:/dashboard');
+    expect((await requireUser()).id).toBe('owner');
+  });
+  it('tidak menerima cookie palsu atau akun yang sudah dihapus untuk mengakses aplikasi', async () => {
+    mocks.token = 'forged-session';
+    await expect(requireUser()).rejects.toThrow('REDIRECT:/');
+    await expect(requireGuest()).resolves.toBeUndefined();
+    await createSession('deleted');
+    mocks.token = mocks.set.mock.calls[0][1];
+    mocks.findUnique.mockResolvedValue(null);
+    await expect(requireUser()).rejects.toThrow('REDIRECT:/');
+    await expect(requireGuest()).resolves.toBeUndefined();
   });
 });

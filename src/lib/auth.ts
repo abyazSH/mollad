@@ -42,6 +42,10 @@ export async function currentUser() {
 }
 export async function requireUser() {
   const user = await currentUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/');
   return user;
+}
+export async function requireGuest() {
+  const user = await currentUser();
+  if (user) redirect('/dashboard');
 }

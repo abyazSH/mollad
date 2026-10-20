@@ -1,8 +1,9 @@
+import { testOrigin } from './test-origin';
 import { test, expect } from '@playwright/test';
 test('dashboard, peringatan anggaran, dan ekspor CSV terfilter', async ({
   page,
 }) => {
-  const headers = { origin: 'http://localhost:3000' };
+  const headers = { origin: testOrigin };
   expect(
     (
       await page.request.post('/api/auth/register', {
@@ -67,7 +68,7 @@ test('dashboard, peringatan anggaran, dan ekspor CSV terfilter', async ({
   await expect(
     page.getByText('Sudah melewati anggaran.', { exact: false }),
   ).toBeVisible();
-  await page.goto('/?month=2026-10');
+  await page.goto('/dashboard?month=2026-10');
   await expect(page.getByText(/^Rp\s*15\.000$/).first()).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Arus keuangan', exact: true }),

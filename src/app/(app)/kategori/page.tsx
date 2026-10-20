@@ -1,7 +1,6 @@
 import { requireUser } from '@/lib/auth';
-import { categoryList } from '@/lib/queries';
-import { CategoryManager } from '@/components/category-manager';
+import { redirect } from 'next/navigation';
 export default async function Page() {
-  const user = await requireUser();
-  return <CategoryManager categories={await categoryList(user.id)} />;
+  await requireUser();
+  redirect('/dompet#kategori');
 }

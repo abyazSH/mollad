@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Text } from '@/components/language-provider';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -20,6 +21,8 @@ import { formatRupiah } from '@/lib/money';
 import { formatDate } from '@/lib/dates';
 import { typeLabels } from '@/lib/finance';
 import { mutate } from '@/lib/client';
+import { categoryColorStyle } from '@/lib/category-colors';
+import { ScanClient } from './scan-client';
 type Option = { id: string; name: string };
 export type TransactionRow = TransactionValue & {
   id: string;
@@ -39,6 +42,8 @@ export function TransactionManager({
   page,
   pages,
   filters,
+  provider,
+  initialScan = false,
 }: {
   rows: TransactionRow[];
   wallets: Option[];
@@ -47,9 +52,19 @@ export function TransactionManager({
   page: number;
   pages: number;
   filters: Record<string, string>;
+  provider: string;
+  initialScan?: boolean;
 }) {
   const router = useRouter();
-  const [edit, setEdit] = useState<TransactionValue | null>(null);
+  const [edit, setEdit] = useState<TransactionValue | null>(
+    initialScan ? {} : null,
+  );
+  const [scan, setScan] = useState(initialScan);
+  function closeEntry() {
+    setEdit(null);
+    setScan(false);
+    if (initialScan) router.replace('/transaksi', { scroll: false });
+  }
   const [removing, setRemoving] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -81,33 +96,33 @@ export function TransactionManager({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">RIWAYAT KEUANGAN</span>
-          <h1 className="page-title">Transaksi</h1>
+          <span className="eyebrow">
+            <Text>{'RIWAYAT KEUANGAN'}</Text>
+          </span>
+          <h1 className="page-title">
+            <Text>{'Transaksi'}</Text>
+          </h1>
           <p className="text-sm text-muted">
-            Cari, periksa, dan kelola pemasukan, pengeluaran, serta transfer.
+            <Text>
+              {
+                'Cari, periksa, dan kelola pemasukan, pengeluaran, serta transfer.'
+              }
+            </Text>
           </p>
         </div>
         <div className="transaction-actions flex w-full flex-wrap gap-2 sm:w-auto">
-          <a
-            className="button button-secondary"
-            href={'/api/export?' + new URLSearchParams(filters)}
-          >
-            Ekspor CSV
-          </a>
-          <Link className="button button-secondary" href="/scan">
-            <ScanLine size={16} />
-            Scan struk
-          </Link>
           <button className="button" onClick={() => setEdit({})}>
             <Plus size={16} />
-            Catat transaksi
+            <Text>{'Catat transaksi'}</Text>
           </button>
         </div>
       </div>
       <div className="card overflow-hidden">
         <form className="border-b border-line p-5" action="/transaksi">
           <label>
-            <span>Cari transaksi</span>
+            <span>
+              <Text>{'Cari transaksi'}</Text>
+            </span>
             <div className="relative">
               <Search
                 size={16}
@@ -127,24 +142,33 @@ export function TransactionManager({
             className="mt-4"
           >
             <summary className="min-h-11 cursor-pointer rounded-lg bg-canvas px-3 py-3 text-xs font-bold">
-              Filter tambahan{hasFilters ? ' · Ada filter aktif' : ''}
+              <Text>{'Filter tambahan'}</Text>
+              <Text>{hasFilters ? ' · Ada filter aktif' : ''}</Text>
             </summary>
             <div className="mt-3 grid gap-3 sm:grid-cols-3">
               <label>
-                <span>Filter tipe</span>
+                <span>
+                  <Text>{'Filter tipe'}</Text>
+                </span>
                 <select name="type" defaultValue={filters.type}>
-                  <option value="">Semua tipe</option>
+                  <option value="">
+                    <Text>{'Semua tipe'}</Text>
+                  </option>
                   {Object.entries(typeLabels).map(([v, l]) => (
                     <option value={v} key={v}>
-                      {l}
+                      <Text>{l}</Text>
                     </option>
                   ))}
                 </select>
               </label>
               <label>
-                <span>Filter kategori</span>
+                <span>
+                  <Text>{'Filter kategori'}</Text>
+                </span>
                 <select name="categoryId" defaultValue={filters.categoryId}>
-                  <option value="">Semua kategori</option>
+                  <option value="">
+                    <Text>{'Semua kategori'}</Text>
+                  </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -153,9 +177,13 @@ export function TransactionManager({
                 </select>
               </label>
               <label>
-                <span>Filter dompet</span>
+                <span>
+                  <Text>{'Filter dompet'}</Text>
+                </span>
                 <select name="walletId" defaultValue={filters.walletId}>
-                  <option value="">Semua dompet</option>
+                  <option value="">
+                    <Text>{'Semua dompet'}</Text>
+                  </option>
                   {wallets.map((w) => (
                     <option key={w.id} value={w.id}>
                       {w.name}
@@ -166,29 +194,30 @@ export function TransactionManager({
             </div>
             <div className="mt-3 flex flex-wrap items-end gap-3">
               <label>
-                Dari tanggal
+                <Text>{'Dari tanggal'}</Text>
                 <input name="from" type="date" defaultValue={filters.from} />
               </label>
               <label>
-                Sampai tanggal
+                <Text>{'Sampai tanggal'}</Text>
                 <input name="to" type="date" defaultValue={filters.to} />
               </label>
             </div>
           </details>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button className="button" type="submit">
-              Terapkan filter
+              <Text>{'Terapkan filter'}</Text>
             </button>
             {hasFilters && (
               <Link
                 href="/transaksi"
                 className="px-3 py-3 text-xs font-bold text-muted"
               >
-                Reset
+                <Text>{'Reset'}</Text>
               </Link>
             )}
             <span className="ml-auto py-3 text-xs text-muted">
-              {count} transaksi
+              {count}
+              <Text>{'transaksi'}</Text>
             </span>
           </div>
         </form>
@@ -201,7 +230,7 @@ export function TransactionManager({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-xs text-muted">
-                    {formatDate(row.date)} · {typeLabels[row.type]}
+                    {formatDate(row.date)} · <Text>{typeLabels[row.type]}</Text>
                   </p>
                   <h2 className="mt-1 break-words text-sm font-bold">
                     {row.merchant ||
@@ -218,11 +247,13 @@ export function TransactionManager({
                       : '')
                   }
                 >
-                  {row.type === 'INCOME'
-                    ? '+'
-                    : row.type === 'EXPENSE'
-                      ? '−'
-                      : ''}
+                  <Text>
+                    {row.type === 'INCOME'
+                      ? '+'
+                      : row.type === 'EXPENSE'
+                        ? '−'
+                        : ''}
+                  </Text>
                   {formatRupiah(row.amount)}
                 </p>
               </div>
@@ -252,7 +283,7 @@ export function TransactionManager({
                   onClick={() => setEdit(row)}
                 >
                   <Pencil size={15} />
-                  Ubah
+                  <Text>{'Ubah'}</Text>
                 </button>
                 <button
                   className="icon-button"
@@ -274,12 +305,22 @@ export function TransactionManager({
           <table className="w-full min-w-[690px] text-left text-sm">
             <thead className="bg-canvas text-[10px] uppercase tracking-wider text-muted">
               <tr>
-                <th className="px-6 py-4">Transaksi</th>
-                <th className="p-4">Kategori</th>
-                <th className="p-4">Dompet</th>
-                <th className="p-4 text-right">Nominal</th>
+                <th className="px-6 py-4">
+                  <Text>{'Transaksi'}</Text>
+                </th>
                 <th className="p-4">
-                  <span className="sr-only">Aksi</span>
+                  <Text>{'Kategori'}</Text>
+                </th>
+                <th className="p-4">
+                  <Text>{'Dompet'}</Text>
+                </th>
+                <th className="p-4 text-right">
+                  <Text>{'Nominal'}</Text>
+                </th>
+                <th className="p-4">
+                  <span className="sr-only">
+                    <Text>{'Aksi'}</Text>
+                  </span>
                 </th>
               </tr>
             </thead>
@@ -332,10 +373,10 @@ export function TransactionManager({
                     <td className="p-4 text-xs">
                       <span className="inline-flex items-center gap-2 rounded-full border border-line px-2.5 py-1">
                         <span
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{
-                            background: row.category?.color || '#64748B',
-                          }}
+                          className="category-color h-1.5 w-1.5 rounded-full"
+                          style={categoryColorStyle(
+                            row.category?.color || '#64748B',
+                          )}
                         />
                         {row.category?.name || 'Transfer'}
                       </span>
@@ -354,11 +395,13 @@ export function TransactionManager({
                           : '')
                       }
                     >
-                      {row.type === 'INCOME'
-                        ? '+'
-                        : row.type === 'EXPENSE'
-                          ? '−'
-                          : ''}
+                      <Text>
+                        {row.type === 'INCOME'
+                          ? '+'
+                          : row.type === 'EXPENSE'
+                            ? '−'
+                            : ''}
+                      </Text>
                       {formatRupiah(row.amount)}
                     </td>
                     <td className="p-4">
@@ -409,29 +452,36 @@ export function TransactionManager({
           <div className="empty">
             <ReceiptText size={30} />
             <h2 className="font-bold text-ink">
-              {hasFilters
-                ? 'Tidak ada transaksi yang cocok'
-                : 'Belum ada transaksi'}
+              <Text>
+                {hasFilters
+                  ? 'Tidak ada transaksi yang cocok'
+                  : 'Belum ada transaksi'}
+              </Text>
             </h2>
             <p>
-              {hasFilters
-                ? 'Coba rentang tanggal lain atau hapus filter pencarian.'
-                : 'Tambahkan pemasukan atau pengeluaran pertamamu.'}
+              <Text>
+                {hasFilters
+                  ? 'Coba rentang tanggal lain atau hapus filter pencarian.'
+                  : 'Tambahkan pemasukan atau pengeluaran pertamamu.'}
+              </Text>
             </p>
             {hasFilters ? (
               <Link className="button button-secondary" href="/transaksi">
-                Hapus semua filter
+                <Text>{'Hapus semua filter'}</Text>
               </Link>
             ) : (
               <button className="button" onClick={() => setEdit({})}>
-                Catat transaksi
+                <Text>{'Catat transaksi'}</Text>
               </button>
             )}
           </div>
         )}
         <div className="flex items-center justify-between border-t border-line p-5 text-xs text-muted">
           <span>
-            Halaman {page} dari {pages}
+            <Text>{'Halaman'}</Text>
+            {page}
+            <Text>{'dari'}</Text>
+            {pages}
           </span>
           <div className="flex gap-3">
             {page > 1 && (
@@ -439,7 +489,7 @@ export function TransactionManager({
                 className="button button-secondary"
                 href={pageUrl(page - 1)}
               >
-                Sebelumnya
+                <Text>{'Sebelumnya'}</Text>
               </Link>
             )}
             {page < pages && (
@@ -447,7 +497,7 @@ export function TransactionManager({
                 className="button button-secondary"
                 href={pageUrl(page + 1)}
               >
-                Berikutnya
+                <Text>{'Berikutnya'}</Text>
               </Link>
             )}
           </div>
@@ -456,20 +506,62 @@ export function TransactionManager({
       {edit && (
         <Modal
           title={edit.id ? 'Ubah transaksi' : 'Catat transaksi'}
-          close={() => setEdit(null)}
+          close={closeEntry}
+          wide={scan}
         >
-          <TransactionForm
-            wallets={wallets}
-            categories={categories}
-            initial={edit}
-            done={() => setEdit(null)}
-          />
+          {!edit.id && (
+            <div
+              className="mb-6 grid grid-cols-2 gap-2"
+              role="group"
+              aria-label="Cara mencatat transaksi"
+            >
+              <button
+                type="button"
+                className={scan ? 'icon-button w-full gap-2 px-3' : 'button'}
+                aria-pressed={!scan}
+                onClick={() => setScan(false)}
+              >
+                <Pencil size={16} />
+                <Text>{'Manual'}</Text>
+              </button>
+              <button
+                type="button"
+                className={scan ? 'button' : 'icon-button w-full gap-2 px-3'}
+                aria-pressed={scan}
+                onClick={() => setScan(true)}
+              >
+                <ScanLine size={16} />
+                <Text>{'Scan struk'}</Text>
+              </button>
+            </div>
+          )}
+          {scan && !edit.id ? (
+            <ScanClient
+              wallets={wallets}
+              categories={categories}
+              provider={provider}
+              manual={() => setScan(false)}
+              done={() => {
+                closeEntry();
+                router.refresh();
+              }}
+            />
+          ) : (
+            <TransactionForm
+              wallets={wallets}
+              categories={categories}
+              initial={edit}
+              done={closeEntry}
+            />
+          )}
         </Modal>
       )}
       {removing && (
         <Modal title="Hapus transaksi?" close={() => setRemoving(null)}>
           <p className="mb-5 text-sm text-muted">
-            Saldo dompet akan dihitung kembali setelah transaksi dihapus.
+            <Text>
+              {'Saldo dompet akan dihitung kembali setelah transaksi dihapus.'}
+            </Text>
           </p>
           {error && (
             <p role="alert" className="error-box mb-4">
@@ -477,7 +569,7 @@ export function TransactionManager({
             </p>
           )}
           <button className="button" disabled={busy} onClick={remove}>
-            Hapus transaksi
+            <Text>{'Hapus transaksi'}</Text>
           </button>
         </Modal>
       )}

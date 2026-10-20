@@ -6,7 +6,7 @@ for (const width of [320, 390, 430]) {
     page,
   }) => {
     await page.setViewportSize({ width, height: 844 });
-    for (const route of ['/login', '/daftar']) {
+    for (const route of ['/login', '/register', '/daftar']) {
       await page.goto(route);
       const submit = page.getByRole('button', {
         name: route === '/login' ? 'Masuk' : 'Buat akun',
