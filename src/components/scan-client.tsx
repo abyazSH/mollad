@@ -16,12 +16,18 @@ import { TransactionForm } from './transaction-form';
 import { Logo } from './logo';
 import { formatRupiah } from '@/lib/money';
 import type { ReceiptData } from '@/lib/ocr/schema';
+import {
+  prepareReceiptUpload,
+  readReceiptResponse,
+} from '@/lib/receipt-upload';
 type Result = {
   id: string;
   data: ReceiptData;
   manual: boolean;
   duplicate: boolean;
   lowConfidence: string[];
+  ocrError?: string;
+  rawText?: string;
 };
 type Option = { id: string; name: string };
 export function ScanClient({
@@ -69,12 +75,17 @@ export function ScanClient({
     if (!file) return;
     setBusy(true);
     setError('');
+    setResult(null);
     try {
       const body = new FormData();
-      body.append('file', file);
+      const upload = await prepareReceiptUpload(file);
+      body.append(
+        'file',
+        upload,
+        upload.type === 'image/jpeg' ? 'receipt.jpg' : 'receipt',
+      );
       const response = await fetch('/api/receipts', { method: 'POST', body });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
+      const data = await readReceiptResponse(response);
       setResult(data);
     } catch (e) {
       setError(
@@ -296,10 +307,17 @@ export function ScanClient({
               {result.manual && (
                 <p className="mb-5 rounded-xl bg-amber-50 p-4 text-xs leading-5 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
                   <Text>
-                    {
-                      'Sebagian tulisan belum terbaca dengan baik. Isi data di bawah; foto tetap terlihat selama review dan tidak disimpan.'
-                    }
+                    {result.ocrError
+                      ? 'Mesin pembaca struk belum berhasil memproses foto. Coba lagi atau isi transaksi secara manual; foto tetap tersedia untuk diperiksa.'
+                      : 'Sebagian tulisan belum terbaca dengan baik. Isi data di bawah; foto tetap terlihat selama review dan tidak disimpan.'}
                   </Text>
+                  <button
+                    type="button"
+                    className="mt-3 block min-h-11 font-bold underline"
+                    onClick={scan}
+                  >
+                    <Text>{'Coba baca lagi'}</Text>
+                  </button>
                 </p>
               )}
               {result.duplicate && (
@@ -334,6 +352,22 @@ export function ScanClient({
                   note: '',
                 }}
               />
+              <details className="mt-6 border-t border-line pt-5 text-xs">
+                <summary className="min-h-11 cursor-pointer font-bold">
+                  <Text>{'Teks hasil pembacaan'}</Text>
+                </summary>
+                <p className="mb-3 text-muted">
+                  <Text>
+                    {
+                      'Periksa teks yang dikenali sebelum dicocokkan ke nominal dan tanggal.'
+                    }
+                  </Text>
+                </p>
+                <pre className="max-h-64 overflow-y-auto whitespace-pre-wrap break-words rounded-xl bg-canvas p-4 font-mono text-xs">
+                  {result.rawText?.trim() ||
+                    'Belum ada teks yang dikenali dari foto ini.'}
+                </pre>
+              </details>
               {!!result.data.items.length && (
                 <details className="mt-6 border-t border-line pt-5 text-xs">
                   <summary className="cursor-pointer font-bold">

@@ -3,7 +3,14 @@ import { MAX_AMOUNT } from '@/lib/money';
 import { emptyReceipt, receiptSchema, type ReceiptData } from './schema';
 export function parseRupiah(text: string): number {
   let clean = text.replace(/Rp\.?/gi, '').replace(/[^\d.,]/g, '');
-  if (clean.includes(',')) clean = clean.split(',')[0].replace(/\./g, '');
+  if (clean.includes(',') && clean.includes('.')) {
+    const last = Math.max(clean.lastIndexOf(','), clean.lastIndexOf('.'));
+    if (clean.length - last - 1 <= 2) clean = clean.slice(0, last);
+    clean = clean.replace(/[.,]/g, '');
+  } else if (clean.includes(','))
+    clean = /^\d{1,3}(?:,\d{3})+$/.test(clean)
+      ? clean.replace(/,/g, '')
+      : clean.split(',')[0];
   else if (/\.\d{2}$/.test(clean) && !/\.\d{3}\./.test(clean))
     clean = clean.slice(0, -3).replace(/\./g, '');
   else clean = clean.replace(/\./g, '');
@@ -36,7 +43,19 @@ export function suggestCategory(text: string) {
   return 'Lainnya';
 }
 export function receiptDate(text: string): string | null {
-  const numeric = text.match(/\b(\d{1,2})[\/-](\d{1,2})[\/-](\d{4}|\d{2})\b/);
+  const candidates: string[] = [];
+  for (const match of text.matchAll(
+    /\b(20\d{2})\s*[-/.]\s*(\d{1,2})\s*[-/.]\s*(\d{1,2})\b/g,
+  )) {
+    candidates.push(
+      `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`,
+    );
+  }
+  const numeric = [
+    ...text.matchAll(
+      /\b(\d{1,2})\s*[\/.-]\s*(\d{1,2})\s*[\/.-]\s*(\d{4}|\d{2})\b/g,
+    ),
+  ];
   const months = [
     'jan',
     'feb',
@@ -53,36 +72,62 @@ export function receiptDate(text: string): string | null {
   ];
   const named = text
     .toLowerCase()
-    .match(
-      /\b(\d{1,2})\s+(jan\w*|feb\w*|mar\w*|apr\w*|mei|jun\w*|jul\w*|agu\w*|sep\w*|okt\w*|nov\w*|des\w*)\s+(\d{4})\b/,
+    .matchAll(
+      /\b(\d{1,2})[\s/-]+(jan\w*|feb\w*|mar\w*|apr\w*|mei|may|jun\w*|jul\w*|agu\w*|aug\w*|sep\w*|okt\w*|oct\w*|nov\w*|des\w*|dec\w*)[\s/-]+(\d{4}|\d{2})\b/g,
     );
-  let result: string | null = null;
-  if (numeric)
-    result =
-      (numeric[3].length === 2 ? '20' : '') +
-      numeric[3] +
-      '-' +
-      numeric[2].padStart(2, '0') +
-      '-' +
-      numeric[1].padStart(2, '0');
-  else if (named)
-    result =
-      named[3] +
-      '-' +
-      String(months.indexOf(named[2].slice(0, 3)) + 1).padStart(2, '0') +
-      '-' +
-      named[1].padStart(2, '0');
-  return result && isoDate.safeParse(result).success ? result : null;
+  for (const match of numeric)
+    candidates.push(
+      (match[3].length === 2 ? '20' : '') +
+        match[3] +
+        '-' +
+        match[2].padStart(2, '0') +
+        '-' +
+        match[1].padStart(2, '0'),
+    );
+  for (const match of named) {
+    const month =
+      (
+        { may: 'mei', aug: 'agu', oct: 'okt', dec: 'des' } as Record<
+          string,
+          string
+        >
+      )[match[2].slice(0, 3)] || match[2].slice(0, 3);
+    candidates.push(
+      (match[3].length === 2 ? '20' : '') +
+        match[3] +
+        '-' +
+        String(months.indexOf(month) + 1).padStart(2, '0') +
+        '-' +
+        match[1].padStart(2, '0'),
+    );
+  }
+  return (
+    candidates.find((candidate) => isoDate.safeParse(candidate).success) || null
+  );
 }
 function amounts(line: string) {
   const clean = line.replace(/\b\d+(?:[.,]\d+)?\s*%/g, '');
-  return [...clean.matchAll(/(?:Rp\.?\s*)?\d[\d.,]*(?!\d)/gi)]
+  return [
+    ...clean.matchAll(
+      /(?:(?:Rp\.?|IDR)\s*)?\d+(?:(?:[.,]\d+)|(?:[ \t]\d{3}\b))*(?!\d)/gi,
+    ),
+  ]
     .map((m) => parseRupiah(m[0]))
     .filter((n) => n > 0);
 }
 export function parseReceipt(text: string, ocrConfidence = 1): ReceiptData {
-  const lines = text
+  text = text
     .slice(0, 100000)
+    .replace(
+      /\b(SUB[\s-]*)?T[O0]T[A4]L\b/gi,
+      (_match, sub: string | undefined) => (sub ? 'SUBTOTAL' : 'TOTAL'),
+    )
+    .replace(/\b[\dOoIl|]+(?:[.,][\dOoIl|]{2,3})+\b/g, (token) =>
+      /\d/.test(token)
+        ? token.replace(/[Oo]/g, '0').replace(/[Il|]/g, '1')
+        : token,
+    );
+  const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter(Boolean);
@@ -122,11 +167,17 @@ export function parseReceipt(text: string, ocrConfidence = 1): ReceiptData {
       )
     ) {
       // Some thermal printers put the amount on the next line.
-      const candidate =
-        value ||
-        (/^(?:Rp\.?\s*)?[\d.,\s]+$/i.test(lines[index + 1] || '')
-          ? amounts(lines[index + 1]).at(-1) || 0
-          : 0);
+      let candidate = value;
+      for (let offset = 1; !candidate && offset <= 2; offset++) {
+        const following = lines[index + offset] || '';
+        if (/^(?:Rp\.?|IDR)$/i.test(following)) continue;
+        if (
+          /^(?:(?:Rp\.?|IDR)\s*)?[\d., \t]+$/i.test(following) &&
+          !receiptDate(following)
+        )
+          candidate = amounts(following).at(-1) || 0;
+        break;
+      }
       if (candidate)
         candidates.push({
           value: candidate,

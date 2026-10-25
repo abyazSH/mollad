@@ -9,11 +9,12 @@ export interface OcrProvider {
 }
 export class TesseractProvider implements OcrProvider {
   async recognize(image: Buffer): Promise<OcrResult> {
-    const langPath = await ensureLanguages();
     let worker: Worker | undefined;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const task = (async () => {
+      const langPath = await ensureLanguages();
+      if (cancelled) throw new Error('OcrTimeout');
       worker = await createWorker(['ind', 'eng'], 1, {
         langPath,
         gzip: false,
@@ -24,15 +25,35 @@ export class TesseractProvider implements OcrProvider {
         await worker.terminate();
         throw new Error('OcrTimeout');
       }
-      await worker.setParameters({
-        tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
-        preserve_interword_spaces: '1',
-      });
-      const { data } = await worker.recognize(image);
-      return {
-        rawText: data.text.slice(0, 100000),
-        data: parseReceipt(data.text, data.confidence / 100),
-      };
+      let best: OcrResult | undefined;
+      let bestScore = -1;
+      // Headers may be readable while a receipt's columns are not. Retry layout
+      // detection on the same image rather than treating a header as success.
+      for (const mode of [PSM.SINGLE_BLOCK, PSM.AUTO, PSM.SPARSE_TEXT]) {
+        if (cancelled) throw new Error('OcrTimeout');
+        await worker.setParameters({
+          tessedit_pageseg_mode: mode,
+          preserve_interword_spaces: '1',
+        });
+        const { data } = await worker.recognize(image);
+        const result = {
+          rawText: data.text.slice(0, 100000),
+          data: parseReceipt(data.text, data.confidence / 100),
+        };
+        const score =
+          (result.data.total ? 4 : 0) +
+          (result.data.tanggal ? 2 : 0) +
+          (result.data.merchant ? 1 : 0) +
+          Math.min(result.rawText.replace(/\s/g, '').length / 500, 1) +
+          Math.max(0, Math.min(data.confidence / 100, 1)) / 2;
+        if (score > bestScore) {
+          best = result;
+          bestScore = score;
+        }
+        if (best && best.data.total > 0 && best.data.confidence >= 0.75) break;
+      }
+      if (!best) throw new Error('OcrNoResult');
+      return best;
     })();
     try {
       return await Promise.race([

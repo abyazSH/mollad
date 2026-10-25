@@ -1,5 +1,11 @@
 // Data entered by users (including category names) stays in its original language.
 export const english: Record<string, string> = {
+  'Teks hasil pembacaan': 'Recognized text',
+  'Periksa teks yang dikenali sebelum dicocokkan ke nominal dan tanggal.':
+    'Review the recognized text before it is matched to the amount and date.',
+  'Coba baca lagi': 'Try reading again',
+  'Mesin pembaca struk belum berhasil memproses foto. Coba lagi atau isi transaksi secara manual; foto tetap tersedia untuk diperiksa.':
+    'The receipt reader could not process this photo. Try again or enter the transaction manually; your photo is still available for review.',
   'Tanggal akhir harus setelah tanggal awal.':
     'The end date must be on or after the start date.',
   'Ekspor belum berhasil. Silakan coba lagi.':

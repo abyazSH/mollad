@@ -24,3 +24,13 @@ Kode menyediakan buildCommand di vercel.json yang menjalankan `npm run vercel:bu
 Log inisialisasi baru hanya mencetak klasifikasi environment (missing/invalid/configured), kode Prisma jika tersedia, dan indikasi masalah engine. Connection string, pesan error mentah, username, password, dan host tidak dicetak. configured berarti format URL dikenali, bukan bukti koneksi berhasil.
 
 Kode P1000 mengarah ke kredensial yang ditolak; P1001 ke server database yang tidak terjangkau. Gunakan kode serta klasifikasi untuk pemeriksaan lanjutan, bukan menebak dari pesan error umum pada UI. Jangan reset database atau menjalankan seed pada database pribadi untuk mengatasi kegagalan koneksi.
+
+## Scan struk selalu masuk mode manual di Vercel
+
+Pesan lama “Sebagian tulisan belum terbaca...” dapat berarti hasil OCR kurang jelas maupun mesin OCR gagal berjalan. Setelah pembaruan, kegagalan mesin menampilkan pesan tersendiri dan tombol Coba baca lagi. Logs hanya mencatat OCR_ENGINE_FAILED atau OCR_TIMEOUT; jangan membagikan struk, credential, atau error mentah.
+
+Gunakan Build Command `npm run vercel:build` (juga diatur di vercel.json). Perintah ini menyiapkan bahasa ind+eng sebelum Next build. next.config.ts menyertakan model bahasa, worker Node, WASM, dan dependency worker dalam trace route /api/receipts. Pada runtime model dibaca tanpa menulis ke folder aplikasi; fallback download memakai folder sementara sistem.
+
+Browser memperkecil foto asli di atas 3,5 MB sebelum dikirim. Preview tetap memakai foto asli lokal. Ini memberi headroom terhadap [batas payload Vercel 4,5 MB](https://vercel.com/docs/functions/limitations); foto tidak ditulis ke database atau object storage. Pengaturan ukuran route tidak dapat menaikkan batas platform tersebut.
+
+Setelah kode di-push, tunggu deployment baru atau lakukan Redeploy. Pastikan build log mencetak Bahasa OCR ind+eng siap. Tidak perlu mengubah database/menjalankan seed. Uji menggunakan struk jelas; jika mesin berjalan tetapi hasil tetap rendah, koreksi manual atau evaluasi foto contoh. Pembacaan OCR tidak dijamin sempurna.

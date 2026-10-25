@@ -20,6 +20,30 @@ describe('Parser struk Indonesia', () => {
     expect(parseRupiah('Rp 1.250.000')).toBe(1250000);
     expect(parseRupiah('1.250,00')).toBe(1250);
     expect(parseRupiah('1250.00')).toBe(1250);
+    expect(parseRupiah('25,000')).toBe(25000);
+    expect(parseRupiah('1,250,000.00')).toBe(1250000);
+  });
+  it.each([
+    [
+      'KOPI PAGI\n25.10.2026\nT0TAL Rp 25.OOO\nTUNAI 50.000',
+      25000,
+      '2026-10-25',
+    ],
+    ['KOPI PAGI\n2026-10-25\nTOTAL IDR 25,000.00', 25000, '2026-10-25'],
+    ['KOPI PAGI\n25-Oct-26\nGRAND TOTAL\nRp\n25.000', 25000, '2026-10-25'],
+    ['KOPI PAGI\n25 / 10 / 2026\nTOTAL 25 000', 25000, '2026-10-25'],
+  ])(
+    'mengenali variasi label, nominal, dan tanggal pada %s',
+    (text, total, date) => {
+      const data = parseReceipt(String(text));
+      expect(data.total).toBe(total);
+      expect(data.tanggal).toBe(date);
+    },
+  );
+  it('tidak mengambil uang tunai ketika nominal setelah label total hilang', () => {
+    expect(
+      parseReceipt('KOPI PAGI\nTOTAL\nTUNAI 50.000\nKEMBALI 25.000').total,
+    ).toBe(0);
   });
   it('mengekstrak pajak dan item', () => {
     const data = parseReceipt(String(fixtures[2][1]));

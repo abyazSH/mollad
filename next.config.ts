@@ -1,6 +1,18 @@
 import type { NextConfig } from 'next';
 const config: NextConfig = {
   serverExternalPackages: ['tesseract.js', 'sharp'],
+  outputFileTracingIncludes: {
+    '/api/receipts': [
+      './.cache/tesseract/*.traineddata',
+      './node_modules/tesseract.js/**',
+      './node_modules/tesseract.js-core/**',
+      './node_modules/wasm-feature-detect/**',
+      './node_modules/regenerator-runtime/**',
+      './node_modules/is-url/**',
+      './node_modules/zlibjs/**',
+      './node_modules/bmp-js/**',
+    ],
+  },
   poweredByHeader: false,
   async headers() {
     return [

@@ -49,7 +49,7 @@ Persentase dapat disimpan sebelum ada pemasukan; alokasi saat itu Rp0 dan tetap 
 
 ## OCR
 
-Default OCR_PROVIDER=tesseract menggunakan bahasa ind+eng. npm run ocr:prepare mengunduh data bahasa ke .cache/tesseract. Tanpa langkah ini, unduhan dilakukan saat scan pertama. Foto JPG/PNG/WebP maksimal 8 MB dan 25 MP diperiksa signature dan decoding, diputar otomatis, metadata dibuang, serta dirender ulang. Salinan OCR di-resize, grayscale, normalize kontras, dan sharpen.
+Default OCR_PROVIDER=tesseract menggunakan bahasa ind+eng. npm run ocr:prepare mengunduh data bahasa ke .cache/tesseract. npm run vercel:build otomatis menyiapkan model bahasa dan menyertakan worker/WASM dalam paket fungsi. Runtime membaca model tanpa menulis ke folder aplikasi; jika model belum tersedia pada Vercel, unduhan memakai folder sementara sistem. Foto JPG/PNG/WebP maksimal 8 MB dan 25 MP diperiksa signature dan decoding, diputar otomatis, metadata dibuang, serta dirender ulang. Salinan OCR di-resize, grayscale, normalize kontras, dan sharpen.
 
 Untuk vision, isi .env:
 
@@ -120,7 +120,7 @@ Ganti USERNAME dan REPOSITORY. Periksa daftar berkas sebelum commit: `.env`, dat
 
 Workflow `.github/workflows/ci.yml` memeriksa lint, TypeScript, unit test, format, build, dan pengujian akses tamu serta autentikasi pada lebar HP 320/390/430 px saat push/pull request. Pengujian HP memakai halaman publik dan memblokir permintaan autentikasi sebelum dikirim. Workflow ini tidak memakai secret Neon, tidak menjalankan migrasi, tidak menulis data produksi, dan tidak melakukan deployment. Untuk pembaruan website otomatis, hubungkan repository ke layanan hosting dan atur variabel lingkungan di layanan itu.
 
-Mengunggah kode ke GitHub berbeda dengan menjalankan aplikasi online. GitHub Pages tidak menjalankan backend Node mollad. Sebelum memakai Vercel, sesuaikan upload struk 8 MB terhadap batas request fungsi 4,5 MB, serta cache bahasa Tesseract yang saat ini ditulis ke `.cache/tesseract`. Hosting Node yang menyediakan filesystem writable sesuai kebutuhan OCR juga dapat digunakan. Set `APP_URL` ke origin website dan simpan koneksi Neon serta secret sesi pada pengaturan hosting.
+Mengunggah kode ke GitHub berbeda dengan menjalankan aplikasi online. GitHub Pages tidak menjalankan backend Node mollad. Browser menerima foto hingga 8 MB dan memperkecil foto besar menjadi JPEG di bawah 3,5 MB sebelum dikirim untuk memberi ruang bagi batas request fungsi Vercel 4,5 MB. Preview tetap memakai foto asli lokal. Gunakan Build Command `npm run vercel:build` agar model bahasa, worker Node, dan WASM Tesseract disertakan dalam deployment. Hosting Node yang menyediakan filesystem writable sesuai kebutuhan OCR juga dapat digunakan. Set `APP_URL` ke origin website dan simpan koneksi Neon serta secret sesi pada pengaturan hosting.
 
 Cookie sesi JWT HTTP-only, bcrypt, validasi origin, pembatasan login berbasis database, dan pembatasan upload per akun. Semua akses data bisnis dibatasi userId, termasuk pemeriksaan relasi sebelum mutasi dan lampiran struk. .env, database, uploads dan cache diabaikan Git. Set APP_URL sesuai origin deployment; produksi memakai HTTPS dan cookie Secure.
 
@@ -137,3 +137,7 @@ Navigasi aplikasi terdiri dari Ringkasan, Transaksi, Dompet, Anggaran, dan Profi
 Profil (/profil) memuat identitas akun, logout, pilihan Bahasa Indonesia/English, mode terang/gelap/sistem, dan ekspor CSV dengan filter. Preferensi bahasa dan tema disimpan pada browser perangkat ini; nama kategori, catatan pengguna, format Rupiah/tanggal Indonesia, pesan validasi server, serta halaman publik tetap menggunakan bahasa aslinya. Bahasa Inggris berlaku pada label utama ruang keuangan dan pengaturan.
 
 Tes e2e/workspace.spec.ts memerlukan E2E_SESSION_TOKEN akun uji yang sudah memiliki dompet dan kategori. Tes ini memblokir upload dan penyimpanan transaksi menggunakan fixture serta tidak membuat data keuangan di database. Jangan memasukkan token sesi ke Git.
+
+### Diagnosis scan di Vercel
+
+Pesan keyakinan rendah hanya dipakai untuk OCR yang berjalan tetapi teksnya kurang terbaca. Jika mesin gagal berjalan atau melewati batas waktu, layar review menampilkan pesan mesin gagal dan tombol Coba baca lagi; foto tetap tersedia lokal. Logs server mencatat kode OCR_ENGINE_FAILED atau OCR_TIMEOUT tanpa teks struk, foto, path, atau credential. Perubahan kode perlu di-push dan deployment diperbarui sebelum berlaku di Vercel. Tidak perlu reset atau seed database.

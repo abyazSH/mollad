@@ -105,3 +105,18 @@
 - Verifikasi: lint dan TypeScript bersih, 78 unit test lulus, delapan skenario browser lulus (skenario Profil diulang setelah nama aksesibel dropdown diperbaiki). Pengujian memakai sesi sementara akun yang sudah ada; upload dan penyimpanan transaksi dimock sehingga tidak membuat data keuangan.
 - Preview HP halaman Dompet, Profil, serta dialog Scan diperiksa visual.
 - Build produksi berhasil: /profil tersedia; /kategori dan /scan menjadi pengalihan terautentikasi. Demo lokal dijalankan kembali pada port 3108.
+
+### Perbaikan OCR pada Vercel
+
+- Model bahasa disiapkan melalui vercel:build dan disertakan bersama worker/WASM serta dependency worker pada trace API struk. Runtime membaca aset bundled tanpa menulis ke folder aplikasi; fallback memakai tmpdir pada Vercel. Deadline OCR mencakup persiapan bahasa.
+- Foto di atas 3,5 MB diperkecil sementara di browser sebelum upload; preview tetap foto asli lokal, tidak disimpan ke server. Respons hosting non-JSON/413/504 mempunyai pesan yang dapat dipahami.
+- Kegagalan mesin dibedakan dari confidence rendah; tersedia Coba baca lagi dengan foto tetap terpasang. Logging hanya kode aman, tidak memuat foto/teks struk/secret.
+- Verifikasi: lint/TypeScript/format bersih, 89 unit test lulus, OCR nyata membaca gambar struk contoh dengan total Rp25.000/tanggal 2026-10-12, vercel:build lulus, dan trace aset deployment terverifikasi. Skenario browser produksi (kompresi file >4,5 MB, fallback mesin, retry, preview) lulus; permintaan OCR pada tes browser dimock sehingga tidak membuat draft/transaksi Neon.
+- Perubahan masih lokal dan perlu deployment baru untuk diterapkan ke website Vercel. Penyebab tepat pada deployment lama belum dipastikan karena pesan lama menyamakan kegagalan mesin dan hasil teks yang kurang terbaca.
+
+### OCR parsial: hanya merchant terbaca
+
+- Provider mencoba tata letak otomatis dan sparse jika mode blok belum menghasilkan nominal yang memadai. Hasil dipilih berdasarkan field yang terbaca; batas waktu keseluruhan tetap 60 detik, dan nominal tidak dikarang jika semua mode gagal.
+- Parser diperluas untuk T0TAL/25.OOO, pemisah ribuan koma, nilai dengan spasi, tanggal ISO/titik/spasi/Oct, dan mata uang yang berada pada baris tersendiri sebelum nominal. Tetap menolak mengambil uang tunai sebagai total saat angka total hilang.
+- Layar review memiliki Teks hasil pembacaan untuk memeriksa apakah OCR mengenali detail yang belum terpetakan. Teks hanya dikembalikan melalui request pengguna yang sudah terautentikasi; tidak dicetak ke log.
+- Lint, TypeScript, format, dan 97 unit test lulus. OCR nyata pada gambar contoh tetap menghasilkan merchant, tanggal, dan total Rp25.000. Gambar pengguna yang bermasalah belum tersedia untuk memverifikasi penyebab persis pada kasus tersebut.

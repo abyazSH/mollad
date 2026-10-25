@@ -33,13 +33,20 @@ export async function POST(request: Request) {
     let data: ReceiptData = { ...emptyReceipt },
       rawText = '',
       failed = false;
+    let ocrError: string | undefined;
     try {
       const result = await getOcrProvider().recognize(processed);
       data = result.data;
       rawText = result.rawText;
-    } catch {
+    } catch (error) {
       failed = true;
-      console.error('[mollad] OCR gagal; review manual tersedia.');
+      ocrError =
+        error instanceof Error && error.message === 'OcrTimeout'
+          ? 'OCR_TIMEOUT'
+          : 'OCR_ENGINE_FAILED';
+      console.error('[mollad] OCR gagal; review manual tersedia.', {
+        code: ocrError,
+      });
     }
     // Only text/structured data persists. Image buffers are request-scoped;
     // the review uses the original browser File through a local blob URL.
@@ -70,8 +77,10 @@ export async function POST(request: Request) {
       {
         id: receipt.id,
         data,
+        rawText,
         duplicate,
         manual: failed || data.confidence < 0.55 || !data.total,
+        ...(ocrError ? { ocrError } : {}),
         lowConfidence: lowConfidenceFields(data),
       },
       { status: 201 },

@@ -2,6 +2,19 @@ import { mkdir, access, writeFile, rename, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { gunzipSync } from 'node:zlib';
+import { tmpdir } from 'node:os';
+async function ready(directory: string) {
+  try {
+    await Promise.all(
+      ['ind', 'eng'].map((lang) =>
+        access(path.join(directory, lang + '.traineddata')),
+      ),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
 let pending: Promise<string> | undefined;
 export function ensureLanguages() {
   if (!pending)
@@ -12,7 +25,15 @@ export function ensureLanguages() {
   return pending;
 }
 async function prepare() {
-  const directory = path.resolve('.cache/tesseract');
+  const bundled = path.resolve('.cache/tesseract');
+  // Deployment assets are read-only. Do not mkdir/write when models are bundled.
+  if (await ready(bundled)) return bundled;
+  const directory = process.env.VERCEL
+    ? path.join(tmpdir(), 'mollad-tesseract')
+    : bundled;
+  return prepareLanguages(directory);
+}
+export async function prepareLanguages(directory: string) {
   await mkdir(directory, { recursive: true });
   for (const lang of ['ind', 'eng']) {
     const target = path.join(directory, lang + '.traineddata');
